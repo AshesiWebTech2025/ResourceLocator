@@ -1,8 +1,8 @@
 //mapbox public access token
-const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoibWFsaW1iYSIsImEiOiJjbTgyeWYwMTEwaWFmMmtxdml6endnZjFmIn0.TF-YvTG_Xa-Nx301EfmZTw'; 
+const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoibWFsaW1iYSIsImEiOiJjbTgyeWYwMTEwaWFmMmtxdml6endnZjFmIn0.TF-YvTG_Xa-Nx301EfmZTw';
 
 //coordinates for Ashesi University (Long, Lat): -0.21972, 5.75972
-const ASHESI_CENTER = [-0.21972, 5.75972]; 
+const ASHESI_CENTER = [-0.21972, 5.75972];
 const INITIAL_ZOOM = 17;
 
 //global Mapbox instance holder (used for resizing)
@@ -17,21 +17,21 @@ function showView(viewId) {
     //hide all views
     if (mapView) mapView.classList.add('hidden');
     if (bookingsView) bookingsView.classList.add('hidden');
-    
+
     //show requested view
     const targetView = document.getElementById(viewId);
     if (targetView) {
         targetView.classList.remove('hidden');
-        
+
         //special case: If map view is shown, ensure Mapbox recalculates its size
         if (viewId === 'map-view' && mapInstance) {
             // A small delay is necessary to ensure the CSS reflow completes before Mapbox attempts to resize.
             setTimeout(() => {
-                 mapInstance.resize();
-            }, 50); 
+                mapInstance.resize();
+            }, 50);
         }
     }
-    
+
     //update active link styling
     if (navMap) navMap.classList.remove('bg-white/20');
     if (navBookings) navBookings.classList.remove('bg-white/20');
@@ -51,8 +51,8 @@ function initializeMap() {
         console.error("Mapbox GL JS library not loaded. Cannot initialize map.");
         return;
     }
-    
-    mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN; 
+
+    mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
 
     const map = new mapboxgl.Map({
         container: 'ashesi-map', //HTML element ID for the map
@@ -62,12 +62,12 @@ function initializeMap() {
         pitch: 45,
         bearing: 0,
         maxBounds: [
-            [-0.23, 5.74], 
+            [-0.23, 5.74],
             [-0.20, 5.77]
         ]
     });
     //store the map instance globally for the resize function in showView
-    mapInstance = map; 
+    mapInstance = map;
     //add navigation control (zoom and compass)
     map.addControl(new mapboxgl.NavigationControl(), 'top-right');
     //add a marker exactly at the center of the campus (Main Administration area)
@@ -79,7 +79,7 @@ function initializeMap() {
     window.addEventListener('resize', () => {
         map.resize();
     });
-    
+
     //on load, ensure the map flies to the center with a nice transition
     map.on('load', () => {
         map.flyTo({
@@ -96,7 +96,7 @@ function initializeMap() {
 function setupSidebarToggle() {
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     if (mobileMenuButton) {
-        mobileMenuButton.addEventListener('click', function() {
+        mobileMenuButton.addEventListener('click', function () {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('-translate-x-full');
         });
@@ -109,14 +109,14 @@ function setupNavigation() {
     const bookingsLink = document.getElementById('nav-bookings');
 
     if (mapLink) {
-        mapLink.addEventListener('click', function(e) {
-            e.preventDefault(); 
+        mapLink.addEventListener('click', function (e) {
+            e.preventDefault();
             showView('map-view');
         });
     }
 
     if (bookingsLink) {
-        bookingsLink.addEventListener('click', function(e) {
+        bookingsLink.addEventListener('click', function (e) {
             e.preventDefault();
             showView('bookings-view');
         });
@@ -126,7 +126,7 @@ function setupNavigation() {
 
 //wait for DOMContentLoaded to ensure all elements referenced by ID exist before calling setup functions.
 document.addEventListener('DOMContentLoaded', () => {
-    initializeMap(); 
+    initializeMap();
     setupSidebarToggle();
     setupNavigation();
     //ensure we start on the map view and style is correct
