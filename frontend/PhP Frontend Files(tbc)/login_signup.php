@@ -1,4 +1,12 @@
-
+<?php
+$page_title = "Ashesi Campus Locator - Authentication";
+//retrieving session messages
+$message = $_SESSION['message'] ?? '';
+$message_type = $_SESSION['message_type'] ?? '';
+//clearing session variables
+unset($_SESSION['message']);
+unset($_SESSION['message_type']);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,7 +37,13 @@
 
     <!-- Authentication Container (Centered Card) -->
     <div class="w-full max-w-md">
-
+        <!-- error div to show login error to user -->
+        <?php if ($message):?>
+            <div class="<?php echo $message_type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'; ?> border-l-4 p-4 mb-6 rounded-md" role="alert">
+                <p class="font-bold"><?php echo $message_type === 'success' ? 'Success!' : 'Error!'; ?></p>
+                <p><?php echo $message; ?></p>
+            </div>
+        <?php endif; ?>
         <!-- App Header/Logo -->
         <div class="text-center mb-8">
             <h1 class="text-3xl font-extrabold text-ashesi-maroon mb-2">Ashesi Resource Locator</h1>

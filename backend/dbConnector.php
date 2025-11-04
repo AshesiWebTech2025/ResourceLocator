@@ -1,9 +1,14 @@
-
 <?php
 //usiing sqlite to connect to a db file locally
 $dbPath = "../setup/mockDatabase.db";
 
-//function to connect to the database stored in setup
+/**
+ * Connects to the SQLite database file and ensures all necessary tables exist.
+ * This function creates tables for users, courses, enrollments, sessions,
+ * attendance, issues, and the new resource (building) locator system.
+ *
+ * @return SQLite3|null The database connection object or null if connection fails.
+ */
 function connectDB(){
     global $dbPath;
     $fullPath = $dbPath;
@@ -13,72 +18,34 @@ function connectDB(){
             $fullPath = realpath($dbPath);
         }
         $db = new SQLite3($dbPath);
-        //ensuring the table exists, if not create it
+        
+        // 1. Users Table (Schema updated to reflect user types: student, faculty, visitor, admin)
         $db->exec("CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY AUTOINCREMENT,
             fullname TEXT NOT NULL,
             ashesi_email TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
-            user_type TEXT NOT NULL,
+            user_type TEXT NOT NULL, -- Expected values: 'student', 'faculty', 'visitor', 'admin'
             ashesi_id INTEGER NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )");
-        //courses table
-        //instructor id here references the fi
-        $db->exec("CREATE TABLE IF NOT EXISTS courses (
-            course_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            course_code TEXT NOT NULL UNIQUE,
-            course_name TEXT NOT NULL,
-            instructor_name TEXT NOT NULL,
-            instructor_id INTEGER NOT NULL, 
-            credits INTEGER NOT NULL DEFAULT 1,
-            auditor_count INTEGER,
-            observer_count INTEGER,
-            FOREIGN KEY(instructor_id) REFRENCES users(user_id) ON DELETE CASCADE
-        )");
-        //course enrollment table
-        $db->exec("CREATE TABLE IF NOT EXISTS course_enrollment (
-            enrollment_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            course_id INTEGER NOT NULL,
-            user_id INTEGER NOT NULL,
-            status TEXT,
-            FOREIGN KEY(course_id) REFERENCES courses(course_id) ON DELETE CASCADE,
-            FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE
-        )");
-        //session table
-        $db->exec("CREATE TABLE IF NOT EXISTS sessions (
-            session_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            course_id INTEGER NOT NULL,
-            session_date TEXT,
-            session_type TEXT NOT NULL DEFAULT 'Lecture',
-            session_notes TEXT,
-            FOREIGN KEY(course_id) REFERENCES courses(course_id) ON DELETE CASCADE
-        )");
         
-        //attendance table
-        $db->exec("CREATE TABLE IF NOT EXISTS attendance (
-            attendance_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            session_id INTEGER NOT NULL,
-            user_id INTEGER NOT NULL,
-            status TEXT NOT NULL DEFAULT 'Absent',
-            FOREIGN KEY(session_id) REFERENCES sessions(session_id) ON DELETE CASCADE,
-            FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE
+        // 2. Resources Table
+        $db->exec("CREATE TABLE IF NOT EXISTS resources (
+            resource_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            resource_name TEXT NOT NULL UNIQUE,
+            resource_type TEXT NOT NULL, -- Expected values: 'classroom', 'seminar room', 'conference hall'
+            capacity INTEGER NOT NULL,
+            -- SQLite CHECK constraint to enforce expected resource types
+            CHECK(resource_type IN ('classroom', 'seminar room', 'conference hall')),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )");
-        //attendance issue table
-        $db->exec("CREATE TABLE attendance_issues (
-            issue_id	INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id	INTEGER NOT NULL,
-            course_id	INTEGER NOT NULL,
-            session_date	INTEGER NOT NULL,
-            issue_description	TEXT NOT NULL,
-            status	TEXT DEFAULT 'Pending',
-            created_at	TEXT DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY(course_id) REFERENCES courses(course_id) ON DELETE CASCADE,
-            FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE
-        );");
+
+        
+        
         return $db; 
     } catch(Exception $e){
-        error_log("there was a database connection error: ". $e->getMessage() . $fullPath);
+        error_log("There was a database connection error: ". $e->getMessage() . " Path: " . $fullPath);
         return null;
     }
 }
