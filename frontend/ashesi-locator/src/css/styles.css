@@ -77,3 +77,41 @@ body {
         padding: 16px; /* Adjust padding for mobile */
     }
 }
+
+/* Hamburger button (mobile) - centralized for all pages */
+.hamburger-btn{
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50; /* above the sidebar (sidebar z-20) */
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+}
+.hamburger-btn span{
+  display: block;
+  width: 26px;
+  height: 2.8px;
+  background: #fff;
+  margin: 4px 0;
+  border-radius: 2px;
+  transition: transform 0.28s ease, opacity 0.28s ease, top 0.28s ease;
+  transform-origin: center;
+}
+
+/* open state: animate into X */
+.hamburger-btn.open span:nth-child(1){ transform: translateY(6px) rotate(45deg); }
+.hamburger-btn.open span:nth-child(2){ opacity: 0; transform: scaleX(0); }
+.hamburger-btn.open span:nth-child(3){ transform: translateY(-6px) rotate(-45deg); }
+
+/* hide on larger screens where sidebar is always visible */
+@media (min-width: 768px){
+  .hamburger-btn{ display: none; }
+}
