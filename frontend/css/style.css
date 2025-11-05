@@ -24,4 +24,10 @@
             right: 0;
         }
 /* end of kharis resourceAllocator styles */
+
+/* Inez's styles for available_sessions.html */
+.modal-backdrop {
+            background: rgba(0, 0, 0, 0.5);
+        }
+/* end of inez's styles for available_sessions.html */
        
