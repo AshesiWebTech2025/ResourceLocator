@@ -148,36 +148,48 @@ Through building this project, we are gaining experience in:
 
 
 ## Contributors
-<p align="left" style="display: flex; gap: 20px; align-items: center;">
-<a href="https://github.com/malimba" style="text-align:center;">
-  <img src="https://avatars.githubusercontent.com/u/44820067?v=4" width="60" height="60" style="border-radius:50%; display:block;">
-  <br />
-  <sub><b>George</b></sub>
-  <br />
-  <sub>malimba</sub>
-</a>
-<a href="https://github.com/trpbtl" style="text-align:center;">
-  <img src="https://avatars.githubusercontent.com/u/161168875?v=4" width="60" height="60" style="border-radius:50%; display:block;">
-  <br />
-  <sub><b>Eyram-Makafui</b></sub>
-  <br />
-  <sub>trpbtl</sub> 
-</a>
-<a href="https://github.com/marzafiee" style="text-align:center;">
-  <img src="https://avatars.githubusercontent.com/u/114308048?v=4" width="60" height="60" style="border-radius:50%; display:block;">
-  <br />
-  <sub><b>Inez</b></sub>
-  <br />
-  <sub>marzafiee</sub>
-</a>
-<a href="https://github.com/sirahknotfound" style="text-align:center;">
-  <img src="https://avatars.githubusercontent.com/u/185804055?v=4" width="60" height="60" style="border-radius:50%; display:block;">
-  <br />
-  <sub><b>Kharis</b></sub>
-  <br />
-  <sub>sirahknotfound</sub>
-</a>
-</p>
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/malimba">
+        <img src="https://avatars.githubusercontent.com/u/44820067?v=4" width="80" height="80" style="border-radius:50%;">
+        <br />
+        <sub><b>George</b></sub>
+        <br />
+        <sub>malimba</sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/trpbtl">
+        <img src="https://avatars.githubusercontent.com/u/161168875?v=4" width="80" height="80" style="border-radius:50%;">
+        <br />
+        <sub><b>Eyram-Makafui</b></sub>
+        <br />
+        <sub>trpbtl</sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/marzafiee">
+        <img src="https://avatars.githubusercontent.com/u/114308048?v=4" width="80" height="80" style="border-radius:50%;">
+        <br />
+        <sub><b>Inez</b></sub>
+        <br />
+        <sub>marzafiee</sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/sirahknotfound">
+        <img src="https://avatars.githubusercontent.com/u/185804055?v=4" width="80" height="80" style="border-radius:50%;">
+        <br />
+        <sub><b>Kharis</b></sub>
+        <br />
+        <sub>sirahknotfound</sub>
+      </a>
+    </td>
+  </tr>
+</table>
+
 
 ## License
 - Distributed under the MIT License.
