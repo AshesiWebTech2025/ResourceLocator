@@ -153,36 +153,36 @@ Through building this project, we are gaining experience in:
   <tr>
     <td align="center">
       <a href="https://github.com/malimba">
-        <img src="https://avatars.githubusercontent.com/u/44820067?v=4" width="80" height="80" style="border-radius:50%;">
+        <img src="https://avatars.githubusercontent.com/u/44820067?v=4" width="90" height="90" style="border-radius:50%;">
         <br />
-        <sub><b>George</b></sub>
+        <b>George</b>
         <br />
         <sub>malimba</sub>
       </a>
     </td>
     <td align="center">
       <a href="https://github.com/trpbtl">
-        <img src="https://avatars.githubusercontent.com/u/161168875?v=4" width="80" height="80" style="border-radius:50%;">
+        <img src="https://avatars.githubusercontent.com/u/161168875?v=4" width="90" height="90" style="border-radius:50%;">
         <br />
-        <sub><b>Eyram-Makafui</b></sub>
+        <b>Eyram-Makafui</b>
         <br />
         <sub>trpbtl</sub>
       </a>
     </td>
     <td align="center">
       <a href="https://github.com/marzafiee">
-        <img src="https://avatars.githubusercontent.com/u/114308048?v=4" width="80" height="80" style="border-radius:50%;">
+        <img src="https://avatars.githubusercontent.com/u/114308048?v=4" width="90" height="90" style="border-radius:50%;">
         <br />
-        <sub><b>Inez</b></sub>
+        <b>Inez</b>
         <br />
         <sub>marzafiee</sub>
       </a>
     </td>
     <td align="center">
       <a href="https://github.com/sirahknotfound">
-        <img src="https://avatars.githubusercontent.com/u/185804055?v=4" width="80" height="80" style="border-radius:50%;">
+        <img src="https://avatars.githubusercontent.com/u/185804055?v=4" width="90" height="90" style="border-radius:50%;">
         <br />
-        <sub><b>Kharis</b></sub>
+        <b>Kharis</b>
         <br />
         <sub>sirahknotfound</sub>
       </a>
