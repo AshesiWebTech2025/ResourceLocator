@@ -6,7 +6,7 @@
   <title>Bookings — Ashesi Locator</title>
 
   <!-- Project stylesheet -->
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="./css/style.css">
 
   <!-- Mapbox GL JS -->
   <script src='https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js'></script>
@@ -34,7 +34,7 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
   <!-- App script (defer to let DOM load) -->
-  <script src="../js/main.js" defer></script>
+  <script src="./js/main.js" defer></script>
 </head>
 <body class="bg-gray-50 font-sans antialiased flex h-screen overflow-hidden">
 
@@ -44,7 +44,7 @@
           <span class="text-xl font-semibold">Ashesi Locator</span>
       </div>
       <nav class="flex-grow p-4 space-y-2">
-          <a href="index.html" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Home</a>
+          <a href="home.html" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Home</a>
           <a href="#" id="nav-map" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Campus Map</a>
           <a href="#" id="nav-bookings" class="flex items-center p-3 rounded-lg bg-white/20 transition duration-150 ease-in-out font-medium">My Bookings</a>
       </nav>
@@ -92,7 +92,7 @@
                 <svg class="mx-auto w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 6h18M5 18h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                 <h4 class="text-lg font-semibold text-gray-800 mb-2">No bookings yet</h4>
                 <p class="text-gray-600 mb-4">You don't have any bookings. Use the "Book a Resource" link on the Home page to create one.</p>
-                <a href="index.html" class="inline-block bg-ashesi-maroon text-white font-semibold py-2 px-4 rounded-lg hover:bg-ashesi-maroon/90 transition">Go to Home</a>
+                <a href="home.html" class="inline-block bg-ashesi-maroon text-white font-semibold py-2 px-4 rounded-lg hover:bg-ashesi-maroon/90 transition">Go to Home</a>
               </div>
             </div>
           </div>
@@ -106,7 +106,7 @@
               <li>Past: <span class="font-medium text-gray-800">0</span></li>
             </ul>
             <div class="mt-6">
-              <a href="index.html" class="block text-center bg-ashesi-maroon text-white font-semibold py-2 px-4 rounded-lg hover:bg-ashesi-maroon/90 transition">Book a Resource</a>
+              <a href="home.html" class="block text-center bg-ashesi-maroon text-white font-semibold py-2 px-4 rounded-lg hover:bg-ashesi-maroon/90 transition">Book a Resource</a>
             </div>
           </aside>
         </section>
@@ -159,8 +159,8 @@
     </footer>
   </div>
 
-  <script src="../js/map.js"></script>
-  <script src="../js/main.js"></script>
+  <script src="./js/map.js"></script>
+  <script src="./js/main.js"></script>
   <script>
     // View switching for bookings.html
     document.addEventListener('DOMContentLoaded', function() {
