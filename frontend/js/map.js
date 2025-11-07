@@ -108,6 +108,7 @@ function setupSidebarToggle() {
 function setupNavigation() {
     const mapLink = document.getElementById('nav-map');
     const bookingsLink = document.getElementById('nav-bookings');
+    const bookingsView = document.getElementById('bookings-view');
 
     if (mapLink) {
         mapLink.addEventListener('click', function (e) {
@@ -116,7 +117,8 @@ function setupNavigation() {
         });
     }
 
-    if (bookingsLink) {
+    // Only prevent default on bookings link if bookings-view exists on this page
+    if (bookingsLink && bookingsView) {
         bookingsLink.addEventListener('click', function (e) {
             e.preventDefault();
             showView('bookings-view');
@@ -127,9 +129,26 @@ function setupNavigation() {
 
 //wait for DOMContentLoaded to ensure all elements referenced by ID exist before calling setup functions.
 document.addEventListener('DOMContentLoaded', () => {
-    initializeMap();
-    setupSidebarToggle();
-    setupNavigation();
-    //ensure we start on the map view and style is correct
-    showView('map-view');
+    // Check if this page uses the standard resourceLocator view structure
+    const mapView = document.getElementById('map-view');
+    const bookingsView = document.getElementById('bookings-view');
+    const homeView = document.getElementById('home-view');
+    
+    // Only run map.js initialization if we have the resourceLocator structure
+    // (map-view and/or bookings-view, but NOT home-view)
+    const isResourceLocatorPage = (mapView || bookingsView) && !homeView;
+    
+    if (isResourceLocatorPage) {
+        setupSidebarToggle();
+        setupNavigation();
+    } else {
+        // Still setup sidebar toggle for mobile on all pages
+        setupSidebarToggle();
+    }
+    
+    // Always initialize the map if the container exists
+    const mapContainer = document.getElementById('ashesi-map');
+    if (mapContainer) {
+        initializeMap();
+    }
 });
