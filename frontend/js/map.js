@@ -5,8 +5,8 @@ const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoibWFsaW1iYSIsImEiOiJjbTgyeWYwMTEwaWFmMmtx
 const ASHESI_CENTER = [-0.21972, 5.75972];
 const INITIAL_ZOOM = 17;
 
-//global Mapbox instance holder (used for resizing)
-let mapInstance = null;
+//global Mapbox instance holder (used for resizing) - exposed globally
+window.mapInstance = null;
 
 function showView(viewId) {
     const mapView = document.getElementById('map-view');
@@ -68,6 +68,7 @@ function initializeMap() {
     });
     //store the map instance globally for the resize function in showView
     mapInstance = map;
+    window.mapInstance = map; // Also expose it globally
     //add navigation control (zoom and compass)
     map.addControl(new mapboxgl.NavigationControl(), 'top-right');
     //add a marker exactly at the center of the campus (Main Administration area)

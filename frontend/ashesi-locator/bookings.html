@@ -6,7 +6,7 @@
   <title>Bookings — Ashesi Locator</title>
 
   <!-- Project stylesheet -->
-  <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="../css/style.css">
 
   <!-- Tailwind (match index.html setup) -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -31,15 +31,8 @@
 
   <!-- App script (defer to let DOM load) -->
   <script src="./js/main.js" defer></script>
-
-  <!-- (Hamburger CSS moved to src/css/styles.css) -->
 </head>
 <body class="bg-gray-50 font-sans antialiased flex h-screen overflow-hidden">
-
-  <!-- Hamburger toggle (mobile) - centralized button -->
-  <button id="hamburgerBtn" class="hamburger-btn" aria-label="Toggle menu" aria-expanded="false" type="button">
-    <span></span><span></span><span></span>
-  </button>
 
   <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out bg-ashesi-maroon text-white w-64 flex flex-col z-20 shadow-xl">
       <div class="p-6 flex items-center h-16 border-b border-white/20">
@@ -120,9 +113,6 @@
     </footer>
   </div>
 
-  <!-- keep app script at bottom for any UI behavior -->
-  <script src="./js/main.js"></script>
-
-  <!-- hamburger behavior moved to src/js/main.js -->
+  <script src="../js/main.js"></script>
 </body>
 </html>
