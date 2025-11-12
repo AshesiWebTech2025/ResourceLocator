@@ -30,16 +30,7 @@ function connectDB(){
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )");
         
-        // 2. Resources Table
-        $db->exec("CREATE TABLE IF NOT EXISTS resources (
-            resource_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            resource_name TEXT NOT NULL UNIQUE,
-            resource_type TEXT NOT NULL, -- Expected values: 'classroom', 'seminar room', 'conference hall'
-            capacity INTEGER NOT NULL,
-            -- SQLite CHECK constraint to enforce expected resource types
-            CHECK(resource_type IN ('classroom', 'seminar room', 'conference hall')),
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )");
+        
 
         
         
