@@ -22,13 +22,13 @@ function connectDB(){
         // 1. Users Table (Schema updated to reflect user types: student, faculty, visitor, admin)
         $db->exec("CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            fullname TEXT NOT NULL,
-            ashesi_email TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL,
-            user_type TEXT NOT NULL, -- Expected values: 'student', 'faculty', 'visitor', 'admin'
-            ashesi_id INTEGER NOT NULL,
+            ashesi_email TEXT UNIQUE NOT NULL,       
+            name TEXT NOT NULL,                     
+            role TEXT NOT NULL,                     
+            password_hash TEXT NOT NULL,            
+            is_active INTEGER NOT NULL DEFAULT 1,   
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )");
+                )");
         
         // 2. Resources Table
         $db->exec("CREATE TABLE IF NOT EXISTS resources (
