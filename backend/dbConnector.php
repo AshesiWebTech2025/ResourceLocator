@@ -30,7 +30,22 @@ function connectDB(){
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )");
         
-        
+        //2. Resource Types Table
+        $db->exec("CREATE TABLE IF NOT EXISTS resource_types (
+            type_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            type_name VARCHAR(100) UNIQUE NOT NULL)");
+
+        //3. Resources Table
+        $db->exec("CREATE TABLE IF NOT EXISTS resources(
+            resource_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            type_id INTEGER NOT NULL,
+            name VARCHAR(255) NOT NULL,
+            capacity INTEGER NOT NULL,
+            description TEXT NOT NULL,
+            latitude DECIMAL(9,6) NOT NULL,
+            longitude DECIMAL(9,6) NOT NULL,
+            is_bookable BOOLEAN DEFAULT 0,
+            FOREIGN KEY (type_id) REFERENCES resource_types(type_id))");
 
         
         
