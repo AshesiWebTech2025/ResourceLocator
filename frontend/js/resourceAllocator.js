@@ -1,18 +1,13 @@
 $(document).ready(function () {
-    // --- Selectors ---
-    
-    // Main Panel Selectors
     const $panel = $("#allocatorSection");
     const $map = $("#ashesi-map");
     const $allocatorForm = $("#allocatorForm");
     const $typeSelect = $("#type");
 
-    // Modal Selectors (Ensure $modal, $addTypeLink, $addTypeForm are accessible globally in this function)
     const $modal = $("#typeModal");
     const $addTypeLink = $("#addTypeLink");
     const $addTypeForm = $("#addTypeForm");
     
-    // --- Helper Functions ---
 
     // Function to open the main allocation panel
     function openPanel() {
@@ -40,25 +35,25 @@ $(document).ready(function () {
 
     
 
-    // A. Open panel when clicking the map
+    // Open panel when clicking the map
     $map.on("click", function (e) {
         e.stopPropagation(); 
         openPanel();
     });
 
-    // B. Close button inside the panel
+    //Close button inside the panel
     $panel.on("click", ".close-btn", function (e) {
         e.preventDefault();
         e.stopPropagation();
         closePanel();
     });
 
-    // C. Prevent clicks inside the panel from closing it (Good for nested forms)
+    //Prevent clicks inside the panel from closing it (Good for nested forms)
     $panel.on("click", function (e) {
         e.stopPropagation();
     });
 
-    // D. Handle form submission (Resource allocation)
+    //Handle form submission (Resource allocation)
     $allocatorForm.on("submit", function (e) {
         e.preventDefault();
 
@@ -79,26 +74,26 @@ $(document).ready(function () {
     });
 
     
-    // A. Open modal when 'Add a new resource type' link is clicked
+    // Open modal when 'Add a new resource type' link is clicked
     $addTypeLink.on('click', function (e) {
         e.preventDefault();
         openModal();
     });
 
-    // B. Close modal via the 'x' button (Using delegated event for robustness)
+    //Close modal via the 'x' button (Using delegated event for robustness)
     $modal.on('click', '.close-modal', function(e) {
         e.preventDefault(); 
         closeModal();
     });
 
-    // C. Close modal when clicking on the dark backdrop
+    //Close modal when clicking on the dark backdrop
     $modal.on('click', function(event) {
         if ($(event.target).is($modal)) {
             closeModal();
         }
     });
 
-    // D. Handle 'Add New Resource Type' form submission (AJAX)
+    // Handle 'Add New Resource Type' form submission (AJAX)
     $addTypeForm.on('submit', function (e) {
         e.preventDefault();
 
@@ -108,7 +103,6 @@ $(document).ready(function () {
             return;
         }
 
-        // Placeholder for AJAX submission to addType.php
         $.ajax({
             url: '../backend/addType.php', 
             method: 'POST',
@@ -130,7 +124,7 @@ $(document).ready(function () {
 
     
     
-    // A. Clicking outside closes the panel (Global Handler)
+    //Clicking outside closes the panel (Global Handler)
     $(document).on("click", function (e) {
         if ($(e.target).closest("#typeModal").length) {
             // Click occurred inside the modal or on the modal's children, so do nothing.
@@ -142,11 +136,76 @@ $(document).ready(function () {
         }
     });
 
-    // B. Handle sidebar (Moved from the old code)
+    //Handle sidebar
     document.getElementById('mobile-menu-button').addEventListener('click', function () {
         const sidebar = document.getElementById('sidebar');
-        // const overlay = document.getElementById('sidebar-overlay'); // removed overlay reference for simplicity
         sidebar.classList.toggle('-translate-x-full');
-        // overlay.classList.toggle('hidden');
+    });
+});
+
+$(document).ready(function() {
+    const $form = $("#allocatorForm");
+    const $typeSelect = $("#type");
+
+    // Load resource types from the backend
+    function loadResourceTypes() {
+        $.get("backend/getTypes.php", function(data) {
+            $typeSelect.empty();
+            $typeSelect.append('<option value="" disabled selected>Select the type</option>');
+            data.forEach(type => {
+                $typeSelect.append(`<option value="${type.type_name}">${type.type_name}</option>`);
+            });
+        }, "json");
+    }
+
+    loadResourceTypes();
+
+    // Handle map clicks for coordinates
+    if (window.mapInstance) {
+        mapInstance.on("click", function(e) {
+            const lng = e.lngLat.lng;
+            const lat = e.lngLat.lat;
+
+            // Remove previous marker
+            if (window.resourceMarker) window.resourceMarker.remove();
+
+            window.resourceMarker = new mapboxgl.Marker({ color: "#FF0000" })
+                .setLngLat([lng, lat])
+                .addTo(mapInstance);
+
+            // Store in hidden fields
+            if ($("#latitude").length === 0) {
+                $form.append('<input type="hidden" id="latitude" name="latitude">');
+                $form.append('<input type="hidden" id="longitude" name="longitude">');
+            }
+            $("#latitude").val(lat);
+            $("#longitude").val(lng);
+        });
+    }
+
+    // Submit form via AJAX
+    $form.on("submit", function(e) {
+        e.preventDefault();
+        const name = $("#name").val().trim();
+        const type = $typeSelect.val();
+        const capacity = $("#capacity").val();
+        const description = $("#description").val().trim();
+        const latitude = $("#latitude").val();
+        const longitude = $("#longitude").val();
+
+        if (!name || !type || !description || !latitude || !longitude) {
+            alert("Please fill all fields and click on the map to select a location.");
+            return;
+        }
+
+        $.post("backend/resourceAllocator.php", {
+            name, type, capacity, description, latitude, longitude
+        }, function(response) {
+            alert(response);
+            $form[0].reset();
+            if (window.resourceMarker) window.resourceMarker.remove();
+        }).fail(function(xhr) {
+            alert("Error: " + xhr.responseText);
+        });
     });
 });
