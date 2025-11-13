@@ -110,7 +110,7 @@ $(document).ready(function () {
 
         // Placeholder for AJAX submission to addType.php
         $.ajax({
-            url: 'backend/addType.php', 
+            url: '../backend/addType.php', 
             method: 'POST',
             data: { type_name: typeName },
             success: function(response) {
