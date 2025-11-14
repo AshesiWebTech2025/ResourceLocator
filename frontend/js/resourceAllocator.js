@@ -53,27 +53,7 @@ $(document).ready(function () {
         e.stopPropagation();
     });
 
-    //Handle form submission (Resource allocation)
-    $allocatorForm.on("submit", function (e) {
-        e.preventDefault();
 
-        const name = $("#name").val().trim();
-        const type = $typeSelect.val();
-        const capacity = $("#capacity").val().trim(); 
-        const description = $("#description").val().trim();
-
-        if (!name || !type || !description) {
-            alert("Please fill in the Name, Type, and Description fields.");
-            return;
-        }
-
-        alert(`Location saved (frontend only): ${name} (${type})`);
-
-        this.reset();
-        closePanel();
-    });
-
-    
     // Open modal when 'Add a new resource type' link is clicked
     $addTypeLink.on('click', function (e) {
         e.preventDefault();
@@ -149,7 +129,7 @@ $(document).ready(function() {
 
     // Load resource types from the backend
     function loadResourceTypes() {
-        $.get("backend/getTypes.php", function(data) {
+        $.get("../backend/getTypes.php", function(data) {
             $typeSelect.empty();
             $typeSelect.append('<option value="" disabled selected>Select the type</option>');
             data.forEach(type => {
@@ -162,25 +142,26 @@ $(document).ready(function() {
 
     // Handle map clicks for coordinates
     if (window.mapInstance) {
-        mapInstance.on("click", function(e) {
-            const lng = e.lngLat.lng;
-            const lat = e.lngLat.lat;
+        mapInstance.on("click", function (e) {
+        let lng = e.lngLat.lng;
+        let lat = e.lngLat.lat;
 
-            // Remove previous marker
-            if (window.resourceMarker) window.resourceMarker.remove();
+        // Round to 5 decimals
+        const nearestLat = Number(lat.toFixed(5));
+        const nearestLng = Number(lng.toFixed(5));
 
-            window.resourceMarker = new mapboxgl.Marker({ color: "#FF0000" })
-                .setLngLat([lng, lat])
-                .addTo(mapInstance);
+        // Remove previous marker
+        if (window.resourceMarker) window.resourceMarker.remove();
 
-            // Store in hidden fields
-            if ($("#latitude").length === 0) {
-                $form.append('<input type="hidden" id="latitude" name="latitude">');
-                $form.append('<input type="hidden" id="longitude" name="longitude">');
-            }
-            $("#latitude").val(lat);
-            $("#longitude").val(lng);
-        });
+        window.resourceMarker = new mapboxgl.Marker({ color: "#FF0000" })
+            .setLngLat([nearestLng, nearestLat])
+            .addTo(mapInstance);
+
+        // Fill the form dynamically with clicked coordinates
+        $("#latitude").val(nearestLat);
+        $("#longitude").val(nearestLng);
+    });
+
     }
 
     // Submit form via AJAX
@@ -198,7 +179,7 @@ $(document).ready(function() {
             return;
         }
 
-        $.post("backend/resourceAllocator.php", {
+        $.post("../backend/resourceAllocator.php", {
             name, type, capacity, description, latitude, longitude
         }, function(response) {
             alert(response);
