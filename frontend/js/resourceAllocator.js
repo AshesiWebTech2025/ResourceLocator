@@ -153,13 +153,11 @@ $(document).ready(function() {
                 .setLngLat([lng, lat])
                 .addTo(mapInstance);
 
-            // Store in hidden fields
-            if ($("#latitude").length === 0) {
-                $form.append('<input type="hidden" id="latitude" name="latitude">');
-                $form.append('<input type="hidden" id="longitude" name="longitude">');
-            }
-            $("#latitude").val(lat);
-            $("#longitude").val(lng);
+            const latClamped = Math.min(Math.max(lat, 5.74), 5.77);
+            const lngClamped = Math.min(Math.max(lng, -0.23), -0.20);
+
+            $("#latitude").val(latClamped.toFixed(5));
+            $("#longitude").val(lngClamped.toFixed(5));
         });
     }
 
