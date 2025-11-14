@@ -53,27 +53,7 @@ $(document).ready(function () {
         e.stopPropagation();
     });
 
-    //Handle form submission (Resource allocation)
-    $allocatorForm.on("submit", function (e) {
-        e.preventDefault();
 
-        const name = $("#name").val().trim();
-        const type = $typeSelect.val();
-        const capacity = $("#capacity").val().trim(); 
-        const description = $("#description").val().trim();
-
-        if (!name || !type || !description) {
-            alert("Please fill in the Name, Type, and Description fields.");
-            return;
-        }
-
-        alert(`Location saved (frontend only): ${name} (${type})`);
-
-        this.reset();
-        closePanel();
-    });
-
-    
     // Open modal when 'Add a new resource type' link is clicked
     $addTypeLink.on('click', function (e) {
         e.preventDefault();
