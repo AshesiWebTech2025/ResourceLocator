@@ -146,25 +146,29 @@ $(document).ready(function() {
             let lng = e.lngLat.lng;
             let lat = e.lngLat.lat;
 
-            // Round to 5 decimals
+            // Round to 5 decimals first
             lng = Number(lng.toFixed(5));
             lat = Number(lat.toFixed(5));
+
+            // Define the allowed ranges (example based on your previous message)
+            const validLats = [5.76469, 5.7647];
+            const validLngs = [-0.23, -0.20]; // adjust to your exact allowed values
+
+            // Snap to nearest valid value
+            const nearestLat = validLats.reduce((a, b) => Math.abs(b - lat) < Math.abs(a - lat) ? b : a);
+            const nearestLng = validLngs.reduce((a, b) => Math.abs(b - lng) < Math.abs(a - lng) ? b : a);
 
             // Remove previous marker
             if (window.resourceMarker) window.resourceMarker.remove();
 
             window.resourceMarker = new mapboxgl.Marker({ color: "#FF0000" })
-                .setLngLat([lng, lat])
+                .setLngLat([nearestLng, nearestLat])
                 .addTo(mapInstance);
 
-            // Clamp coordinates to valid range
-            const latClamped = Math.min(Math.max(lat, 5.74), 5.77);
-            const lngClamped = Math.min(Math.max(lng, -0.23), -0.20);
-
-            // Fill the form with clamped values
-            $("#latitude").val(latClamped);
-            $("#longitude").val(lngClamped);
-        });
+            // Fill the form with snapped values
+            $("#latitude").val(nearestLat);
+            $("#longitude").val(nearestLng);
+});
 
     }
 
