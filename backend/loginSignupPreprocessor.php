@@ -3,10 +3,8 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 session_start();
-// The path is correct because this file is in 'backend/' and dbConnector is also in 'backend/'
 require_once 'dbConnector.php';
 
-// Check if the server request is POST; if not, redirect to the main login page
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: ../frontend/login_signup.php");
     exit();
@@ -17,7 +15,6 @@ $passedValidation = true;
 $message = "";
 
 if ($action === "login") {
-    // --- LOGIN LOGIC ---
     $ashesi_email = htmlspecialchars(trim($_POST["login_email"] ?? ""));
     $password = $_POST["login_password"] ?? '';
 
@@ -33,7 +30,6 @@ if ($action === "login") {
         $db = connectDB();
         if ($db) {
             try {
-                // IMPORTANT: Updated query to select 'name' and 'role' (previously user_type)
                 $stmt = $db->prepare('SELECT user_id, password_hash, name, role FROM users WHERE ashesi_email = :email AND is_active = 1');
                 $stmt->bindValue(':email', $ashesi_email, SQLITE3_TEXT);
                 $result = $stmt->execute();
@@ -43,7 +39,7 @@ if ($action === "login") {
                 if ($user) {
                     $passwordValid = password_verify($password, $user['password_hash']);
                     if ($passwordValid) {
-                        // Login successful
+                        //successful login
                         $_SESSION['user_id'] = $user['user_id'];
                         $_SESSION['role'] = $user['role']; // Using 'role' from the new schema
                         $_SESSION['name'] = $user['name'];
@@ -51,20 +47,20 @@ if ($action === "login") {
                         $_SESSION['message'] = "Welcome back, " . $user['name'] . "!";
                         $_SESSION['message_type'] = "success";
                         
-                        // Routing based on user role (you may need to adjust these file paths)
+                        //routing users based on roles. for now all rols go to resouceLocator.html 
                         switch ($user["role"]) {
                             case "Student":
-                                header("Location: ../studentDashboard.php");
+                                header("Location: ../frontend/resourceLocator.html");
                                 exit();
                             case "Faculty":
                             case "Staff":
-                                header("Location: ../facultyStaffDashboard.php"); // Example
+                                header("Location: ../frontend/resourceLocator.html");
                                 exit();
                             case "Admin":
-                                header("Location: ../adminDashboard.php"); // Example
+                                header("Location: ../frontend/resourceAllocator.html");
                                 exit();
                             default:
-                                header('Location: ../dashboard.php');
+                                header('Location: ../frontend/resourceLocator.html');
                                 exit();
                         }
                     } else {
@@ -81,22 +77,18 @@ if ($action === "login") {
             $message = "Server maintenance in progress. Please try again later.";
         }
     }
-
-    // Redirect back to the login form if login fails
+    //redirecting user to lgin page if login fails
     $_SESSION['message'] = $message;
     $_SESSION['message_type'] = 'error';
     header('Location: ../frontend/login_signup.php');
     exit();
-
 } elseif ($action === "signup") {
-    // --- SIGNUP LOGIC ---
     $name = htmlspecialchars(trim($_POST["name"] ?? ""));
     $ashesi_email = htmlspecialchars(trim($_POST["email"] ?? ""));
     $password = $_POST["password"] ?? '';
     $cpassword = $_POST["confirm_password"] ?? '';
     $role = $_POST["role"] ?? '';
-
-    // Validation
+    //validation
     if (empty($name) || empty($ashesi_email) || empty($password) || empty($cpassword) || empty($role)) {
         $message = "All fields are required.";
         $passedValidation = false;
@@ -107,26 +99,22 @@ if ($action === "login") {
         $message = "Enter a valid Ashesi email address (ending with @ashesi.edu.gh).";
         $passedValidation = false;
     }
-
-    // Password strength check (simple server-side check)
+    //additional server side check for password
     if ($passedValidation && strlen($password) < 8) {
         $message = "Password must be at least 8 characters long.";
         $passedValidation = false;
     }
-
-    // Role validation against expected values
+    //role validation
     $valid_roles = ['Student', 'Faculty', 'Staff', 'Visitor'];
     if ($passedValidation && !in_array($role, $valid_roles)) {
         $message = "Invalid role selected.";
         $passedValidation = false;
     }
-
-
     if ($passedValidation) {
         $db = connectDB();
         if ($db) {
             try {
-                // Check if user already exists
+                //checking if user already exists in database
                 $checkStmt = $db->prepare('SELECT user_id FROM users WHERE ashesi_email = :email');
                 $checkStmt->bindValue(':email', $ashesi_email, SQLITE3_TEXT);
                 $existingUser = $checkStmt->execute()->fetchArray(SQLITE3_ASSOC);
@@ -135,15 +123,13 @@ if ($action === "login") {
                     $message = "An account with this email already exists.";
                 } else {
                     $password_hash = password_hash($password, PASSWORD_DEFAULT);
-                    
-                    // Insert new user
+                    //insert new user
                     $insertStmt = $db->prepare('INSERT INTO users (name, ashesi_email, password_hash, role) 
                                                 VALUES (:name, :email, :pass, :role)');
-                    
                     $insertStmt->bindValue(':name', $name, SQLITE3_TEXT);
                     $insertStmt->bindValue(':email', $ashesi_email, SQLITE3_TEXT);
                     $insertStmt->bindValue(':pass', $password_hash, SQLITE3_TEXT);
-                    $insertStmt->bindValue(':role', $role, SQLITE3_TEXT); // Storing the selected role
+                    $insertStmt->bindValue(':role', $role, SQLITE3_TEXT);
                     
                     $success = $insertStmt->execute();
 
@@ -168,14 +154,14 @@ if ($action === "login") {
         }
     }
 
-    // Redirect back to the signup form if registration fails
+    //redirect user. to signup if login failed
     $_SESSION['message'] = $message;
     $_SESSION['message_type'] = 'error';
-    header('Location: ../frontend/login_signup.php?view=signup'); // Append ?view=signup to show the signup form
+    header('Location: ../frontend/login_signup.php?view=signup'); //append ?view=signup to show the signup form
     exit();
 
 } else {
-    // Unknown action
+    //unknown action
     $_SESSION['message'] = "Invalid request action.";
     $_SESSION['message_type'] = 'error';
     header('Location: ../frontend/login_signup.php');

@@ -6,11 +6,11 @@ session_start();
 
 $page_title = "Ashesi Resource Locator - Authentication";
 
-// Retrieving session messages
+//retrieveing any session messages
 $message = $_SESSION['message'] ?? '';
 $message_type = $_SESSION['message_type'] ?? '';
 
-// Clearing session variables immediately after retrieval
+//clearing any session variables immediately after retrieval
 unset($_SESSION['message']);
 unset($_SESSION['message_type']);
 ?>
@@ -42,16 +42,16 @@ unset($_SESSION['message_type']);
 </head>
 <body class="bg-gray-50 font-sans antialiased flex items-center justify-center min-h-screen p-4">
 
-    <!-- Authentication Container (Centered Card) -->
+    <!-- auth card -->
     <div class="w-full max-w-md">
 
-        <!-- App Header/Logo -->
+        <!-- app header -->
         <div class="text-center mb-8">
             <h1 class="text-3xl font-extrabold text-ashesi-maroon mb-2">Ashesi Resource Locator</h1>
             <p class="text-gray-500 text-lg">Student Access Portal</p>
         </div>
 
-        <!-- System Message Display -->
+        <!-- system display message -->
         <?php if ($message): ?>
             <div class="mb-6">
                 <div class="<?php echo $message_type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'; ?> 
@@ -62,15 +62,15 @@ unset($_SESSION['message_type']);
             </div>
         <?php endif; ?>
 
-        <!-- Toggable Form Card -->
+        <!-- form card -->
         <div class="bg-white p-8 md:p-10 rounded-xl shadow-2xl border border-gray-100">
             
-            <!-- Login Form (Default View) -->
+            <!--login form -->
             <div id="login-form">
                 <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Welcome Back!</h2>
                 
                 <form method="POST" action="../backend/loginSignupPreprocessor.php">
-                    <!-- Hidden field to identify action -->
+                    <!-- hidden action -->
                     <input type="hidden" name="action" value="login">
 
                     <div class="mb-5">
@@ -99,12 +99,12 @@ unset($_SESSION['message_type']);
                 </p>
             </div>
             
-            <!-- Signup Form (Hidden by Default) -->
+            <!-- hidden signup form -->
             <div id="signup-form" class="hidden">
                 <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Create Account</h2>
                 
                 <form id="signupForm" method="POST" action="../backend/loginSignupPreprocessor.php">
-                    <!-- Hidden field to identify action -->
+                    <!-- hidden failed to identify action-->
                     <input type="hidden" name="action" value="signup">
 
                      <div class="mb-5">
@@ -168,7 +168,6 @@ unset($_SESSION['message_type']);
     
     <!-- JavaScript for toggling forms and client-side validation -->
     <script>
-        // --- Custom Tailwind Styling for Password Strength (Copied from old project) ---
         const style = document.createElement('style');
         style.textContent = `
             .strength-low { background-color: #f87171; width: 33%; }
@@ -176,8 +175,6 @@ unset($_SESSION['message_type']);
             .strength-high { background-color: #4ade80; width: 100%; }
         `;
         document.head.appendChild(style);
-
-        // --- Form Toggling ---
         function toggleForm(view) {
             const loginForm = document.getElementById('login-form');
             const signupForm = document.getElementById('signup-form');
@@ -190,9 +187,6 @@ unset($_SESSION['message_type']);
                 signupForm.classList.remove('hidden');
             }
         }
-
-        // --- Client-Side Validation Logic (for Signup) ---
-
         const signupForm = document.getElementById('signupForm');
         const emailInput = document.getElementById('signup-email');
         const emailError = document.getElementById('email-error');
@@ -245,8 +239,7 @@ unset($_SESSION['message_type']);
 
         function validateForm() {
             let isValid = true;
-
-            // Ashesi Email Validation
+            //Ashesi Email Validation
             if (!emailInput.value.endsWith(ASHESI_DOMAIN)) {
                 emailError.classList.remove('hidden');
                 emailInput.classList.add('border-red-500');
@@ -255,8 +248,7 @@ unset($_SESSION['message_type']);
                 emailError.classList.add('hidden');
                 emailInput.classList.remove('border-red-500');
             }
-            
-            // Password Match Validation
+            //password match validation
             if (passwordInput.value !== confirmPasswordInput.value) {
                 confirmError.classList.remove('hidden');
                 confirmPasswordInput.classList.add('border-red-500');
@@ -266,13 +258,13 @@ unset($_SESSION['message_type']);
                 confirmPasswordInput.classList.remove('border-red-500');
             }
 
-            // Password strength check (prevent submission if weak)
+            //password strength check. Submissioin is prevented if password is weak
             const strength = checkPasswordStrength(passwordInput.value);
             if (passwordInput.value.length > 0 && strength < 2) {
-                isValid = false; // Prevent submission if password is too weak
+                isValid = false;//preventing submission if the password is too weak
             }
 
-            // Disabling or enabling the button based on validity
+            //disabling or enabling the button based on validity
             submitBtn.disabled = !isValid; 
             if (!isValid) {
                  submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -284,8 +276,7 @@ unset($_SESSION['message_type']);
 
             return isValid;
         }
-
-        // Adding event listeners
+        //adding event listeners
         passwordInput.addEventListener('input', (e) => {
             const strength = checkPasswordStrength(e.target.value);
             updateStrengthIndicator(strength);
@@ -295,17 +286,17 @@ unset($_SESSION['message_type']);
         emailInput.addEventListener('input', validateForm);
         confirmPasswordInput.addEventListener('input', validateForm);
 
-        // Preventing form submission if client-side validation fails
+        //prevening form submission if client-side validation fails
         signupForm.addEventListener('submit', (e) => {
             if (!validateForm()) {
                 e.preventDefault();
-                // Instead of alert(), we rely on the visible error messages
+                //php error messages will take over
             }
         });
 
-        // Initialize form view state (useful if returning from a failed submission)
+        //iinitializing form view.Primarily used when form fails, 
         document.addEventListener('DOMContentLoaded', () => {
-             // If any server-side message exists (usually means failure), show the signup form if fields were posted
+             //if any server-side message exists (usually means failure), show the signup form if fields were posted
              const urlParams = new URLSearchParams(window.location.search);
              const defaultView = urlParams.get('view') || 'login';
              toggleForm(defaultView);
