@@ -137,7 +137,7 @@ if ($action === "login") {
                         $message = "Account created successfully! Please log in.";
                         $_SESSION['message_type'] = "success";
                         $db->close();
-                        header('Location: ../login_signup.php'); // Redirect to login page
+                        header('Location: ../frontend/login_signup.php'); // Redirect to login page
                         exit();
                     } else {
                         $message = "Registration failed due to a database error.";
