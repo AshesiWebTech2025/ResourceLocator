@@ -281,6 +281,9 @@
                     <div class="border-l-4 border-purple-500 pl-6 py-3">
                         <h4 class="font-bold text-lg text-purple-800 mb-2">Eyra Inez Agbenu</h4>
                         <p class="text-gray-700">Developed the Admin "Available Sessions" page, which serves as the main interface for managing resource availability across multiple hotspot locations on campus. Designed the full-page layout using HTML and Tailwind CSS including a responsive sidebar with navigation for Resource Allocator, Available Sessions, Analytics, Settings, and Sign Out tabs/pages. Created a dynamic JavaScript-generated hotspot list that displays each resource's name and tag, lets the admin click a hotspot to open the editing modal, and is fully generated from a JavaScript array, making it easy to later connect to backend data. Built a center-aligned interactive modal where administrators can add, remove, and edit time slots for each resource. Implemented all the front-end logic for state management, slot rendering, and modal transitions, and set up the Mapbox container for integration with the team's map script. Overall, provided a functional and responsive interface for managing session availability within the admin dashboard.</p>
+                        <br>
+                        <h5 class ="text-gray-700">Sprint 2</h5>
+                        <p class ='text-gray-700'>Created an additional entity table, resource_availability, to help  determining the status of a  and included its attributed in the dbConnector.php file (which houses our database details). That is, to tell which ones are occupied or not and at what times. I then drew our Entity-Relationship Diagram (ERD) which you can access in the root folder of our repository.
                     </div>
                     <div class="border-l-4 border-orange-500 pl-6 py-3">
                         <h4 class="font-bold text-lg text-orange-800 mb-2">Kharis Ewurabena Dadzie</h4>
