@@ -262,7 +262,11 @@
                 <div class="space-y-6">
                     <div class="border-l-4 border-blue-500 pl-6 py-3">
                         <h4 class="font-bold text-lg text-blue-800 mb-2">George Malimba Billa-Yandanbon</h4>
+                        <h5 class ="text-gray-700">Sprint 1</h5>
                         <p class="text-gray-700">Implemented the resource locator page which will be viewed by visitors, students and faculty. Ensured the inclusion of an adequate search functionality that helps filter locations by room type and capacity. Implemented the base logic for the map rendering using Mapbox and its CDN. Ensured that all files presented by fellow group members were adequately structured to follow the entire project structure. Compiled and aggregated all code bases including but not limited to style sheets, and JavaScript. Started minimal work on authentication using PHP for login and signup functionality.</p>
+                        <br>
+                        <h5 class ="text-gray-700">Sprint 2</h5>
+                        <p class='text-gray-700'>Created the SQLite database and wrote the dbConnector.php to connect the project to the database. Also created the users table. Worked on the login-sign up backend for user authentication</p>
                     </div>
                     <div class="border-l-4 border-green-500 pl-6 py-3">
                         <h4 class="font-bold text-lg text-green-800 mb-2">Eyram-Makafui Awoye</h4>
