@@ -46,12 +46,12 @@ try {
 
 
     // Insert into database
-    $sql = "INSERT INTO resources (name, type_id, capacity, description, latitude, longitude)
-        VALUES (:name, :type_id, :capacity, :description, :lat, :lng)";
+    $sql = "INSERT INTO resources (type_id, name, capacity, description, latitude, longitude)
+        VALUES (:type_id, :name, :capacity, :description, :lat, :lng)";
 
     $stmt = $db->prepare($sql);
+    $stmt->bindValue(':type_id', $type_id, SQLITE3_TEXT);
     $stmt->bindValue(':name', $name, SQLITE3_TEXT);
-    $stmt->bindValue(':type', $type, SQLITE3_TEXT);
     $stmt->bindValue(':capacity', $capacity, SQLITE3_INTEGER);
     $stmt->bindValue(':description', $description, SQLITE3_TEXT);
     $stmt->bindValue(':lat', $latitude, SQLITE3_FLOAT);
