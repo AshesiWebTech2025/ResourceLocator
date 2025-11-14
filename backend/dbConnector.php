@@ -60,6 +60,16 @@ function connectDB(){
             FOREIGN KEY (user_id) REFERENCES Users(user_id)
         )");
 
+        //5. Resource Availability Slots Table (for Available Sessions page)
+        $db->exec("CREATE TABLE IF NOT EXISTS resource_availability (
+            availability_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            resource_id INTEGER NOT NULL,
+            day_of_week TEXT NOT NULL,
+            start_time TEXT NOT NULL,
+            end_time TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (resource_id) REFERENCES resources(resource_id) ON DELETE CASCADE)");
+
         
         
         return $db; 
