@@ -125,6 +125,7 @@ unset($_SESSION['message_type']);
                         <select id="signup-role" name="role" required
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ashesi-maroon/50 focus:border-ashesi-maroon transition duration-150">
                             <option value="" disabled selected>Select your role</option>
+                            <option value="Admin">Admin</option>
                             <option value="Student">Student</option>
                             <option value="Faculty">Faculty</option>
                             <option value="Staff">Staff</option>

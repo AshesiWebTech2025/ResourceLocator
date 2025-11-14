@@ -79,6 +79,47 @@ function connectDB(){
     }
 }
 
+/**
+ * Executes a resource query with optional filtering.
+ *
+ * @param SQLite3 $db The database connection object.
+ * @param string $searchTerm Optional term to filter by name, description, or type.
+ * @return array List of resources.
+ */
+function getFilteredResources(SQLite3 $db, $searchTerm = ''){
+    $resources = [];
+    $search = $db->escapeString("%" . $searchTerm . "%");
+
+    $query = "SELECT r.*, rt.type_name 
+              FROM Resources r 
+              JOIN Resource_Types rt ON r.type_id = rt.type_id";
+    
+    if (!empty($searchTerm)) {
+        $query .= " WHERE r.name LIKE :search 
+                    OR r.description LIKE :search 
+                    OR rt.type_name LIKE :search";
+    }
+
+    $results = $db->query($query);
+
+    if ($results) {
+        while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+            $resources[] = $row;
+        }
+    }
+    return $resources;
+}
+
+/**
+ * Fetches all resources (no filter).
+ *
+ * @param SQLite3 $db The database connection object.
+ * @return array List of all resources.
+ */
+function getAllResources(SQLite3 $db){
+    return getFilteredResources($db);
+}
+
 //if you wish to connect to a hosted mysql instance uncomment this ad fill out accordingly
 // $servername = "localhost"; //use school server IP if connecting to school server over a newtork connection, or set to  'localhost' for XAMPP
 // $username = "root";       //XAMPP default username

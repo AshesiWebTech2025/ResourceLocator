@@ -95,9 +95,11 @@ $(document).ready(function () {
                 alert(`Resource Type Added: ${typeName}`); 
                 closeModal();
             },
+            // CRITICAL FIX: Extract the specific error message from the PHP response
             error: function(xhr, status, error) {
-                alert("An error occurred while adding the resource type.");
-                console.error("AJAX Error:", status, error);
+                const errorMessage = xhr.responseText || `Status ${xhr.status}: ${error}`;
+                alert("Failed to add resource type: " + errorMessage);
+                console.error("AJAX Error:", status, error, xhr.responseText);
             }
         });
     });
@@ -135,7 +137,9 @@ $(document).ready(function() {
             data.forEach(type => {
                 $typeSelect.append(`<option value="${type.type_name}">${type.type_name}</option>`);
             });
-        }, "json");
+        }, "json").fail(function(xhr) {
+             console.error("Failed to load resource types:", xhr.responseText);
+        });
     }
 
     loadResourceTypes();
