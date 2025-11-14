@@ -143,8 +143,12 @@ $(document).ready(function() {
     // Handle map clicks for coordinates
     if (window.mapInstance) {
         mapInstance.on("click", function(e) {
-            const lng = e.lngLat.lng;
-            const lat = e.lngLat.lat;
+            let lng = e.lngLat.lng;
+            let lat = e.lngLat.lat;
+
+            // Round to 5 decimals for the form
+            lng = Number(lng.toFixed(5));
+            lat = Number(lat.toFixed(5));
 
             // Remove previous marker
             if (window.resourceMarker) window.resourceMarker.remove();
@@ -156,8 +160,8 @@ $(document).ready(function() {
             const latClamped = Math.min(Math.max(lat, 5.74), 5.77);
             const lngClamped = Math.min(Math.max(lng, -0.23), -0.20);
 
-            $("#latitude").val(latClamped.toFixed(5));
-            $("#longitude").val(lngClamped.toFixed(5));
+            $("#latitude").val(lat);
+            $("#longitude").val(lng);
         });
     }
 
