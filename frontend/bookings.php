@@ -38,17 +38,45 @@
 </head>
 <body class="bg-gray-50 font-sans antialiased flex h-screen overflow-hidden">
 
+  <?php
+    // 1. Include the database connector
+    require_once '../backend/dbConnector.php';
+
+    // 2. Establish a connection
+    $db = connectDB(); // Assumes connectDB() is the function in dbConnector.php
+
+    // 3. Fetch bookings for a specific user (using a hardcoded user_id=1 for now)
+    // This query joins Bookings with Resources to get the resource name.
+    $userId = 1; // In a real app, this would come from a login session
+    $stmt = $db->prepare("
+        SELECT 
+            b.start_time, 
+            b.end_time, 
+            b.status, 
+            r.name AS resource_name
+        FROM Bookings b
+        JOIN Resources r ON b.resource_id = r.resource_id
+        WHERE b.user_id = :user_id
+        ORDER BY b.start_time DESC
+    ");
+    $stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+    $results = $stmt->execute();
+  ?>
+
+  <button id="hamburgerBtn" class="hamburger-btn" aria-label="Toggle menu" aria-expanded="false" type="button">
+    <span class="hamburger-icon"></span>
+  </button>
+
   <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out bg-ashesi-maroon text-white w-64 flex flex-col z-20 shadow-xl">
       <div class="p-6 flex items-center h-16 border-b border-white/20">
           <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
           <span class="text-xl font-semibold">Ashesi Locator</span>
       </div>
       <nav class="flex-grow p-4 space-y-2">
-            <a href="home.html" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Home</a>
-            <a href="#" id="nav-map" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Campus Map</a>
-            <a href="bookings.html" id="nav-bookings" class="flex items-center p-3 rounded-lg bg-white/20 transition duration-150 ease-in-out font-medium">My Bookings</a>
-            <a href="about.html" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">About</a>
-        </nav>
+          <a href="home.php" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Home</a>
+          <a href="#" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Campus Map</a>
+          <a href="bookings.php" class="flex items-center p-3 rounded-lg bg-white/20 transition duration-150 ease-in-out font-medium">My Bookings</a>
+      </nav>
       <div class="p-4 space-y-2 border-t border-white/20">
           <a href="#" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Settings</a>
           <a href="#" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Sign Out</a>
@@ -75,31 +103,42 @@
           <!-- Bookings list column -->
           <div class="col-span-2">
             <div id="bookings-list" class="space-y-4" aria-live="polite">
-              <!-- Example booking card (replace/duplicate via JS) -->
-              <div class="booking-card bg-white p-6 rounded-xl shadow border border-gray-100 flex items-start justify-between">
-                <div>
-                  <h3 class="text-lg font-semibold text-gray-800">Group Study Room — Rm 204</h3>
-                  <p class="text-sm text-gray-600 mt-1">Date: <span class="font-medium text-gray-700">Oct 30, 2025</span> • Time: <span class="font-medium text-gray-700">14:00 - 16:00</span></p>
-                  <p class="text-sm text-gray-500 mt-2">Status: <span class="inline-block bg-ashesi-light text-ashesi-maroon px-2 py-1 rounded-full text-xs font-medium">Confirmed</span></p>
-                </div>
-                <div class="flex flex-col items-end gap-2">
-                  <button class="text-ashesi-maroon border border-ashesi-maroon rounded-full px-3 py-1 text-sm hover:bg-ashesi-maroon hover:text-white transition">View</button>
-                  <button class="text-red-600 border border-red-200 rounded-full px-3 py-1 text-sm hover:bg-red-50 transition">Cancel</button>
-                </div>
+            
+            <?php
+              // 4. Loop through the results and display them
+              $hasBookings = false;
+              while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+                $hasBookings = true;
+                // Format dates and times for display
+                $startTime = new DateTime($row['start_time']);
+                $endTime = new DateTime($row['end_time']);
+            ?>
+            <!-- Dynamic booking card -->
+            <div class="booking-card bg-white p-6 rounded-xl shadow border border-gray-100 flex items-start justify-between">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-800"><?php echo htmlspecialchars($row['resource_name']); ?></h3>
+                <p class="text-sm text-gray-600 mt-1">Date: <span class="font-medium text-gray-700"><?php echo $startTime->format('M d, Y'); ?></span> • Time: <span class="font-medium text-gray-700"><?php echo $startTime->format('H:i') . ' - ' . $endTime->format('H:i'); ?></span></p>
+                <p class="text-sm text-gray-500 mt-2">Status: <span class="inline-block bg-ashesi-light text-ashesi-maroon px-2 py-1 rounded-full text-xs font-medium"><?php echo htmlspecialchars($row['status']); ?></span></p>
               </div>
-
-              <!-- Empty state (hidden when bookings exist) -->
-              <div id="empty-state" class="hidden bg-white p-8 rounded-xl shadow border border-gray-100 text-center">
-                <svg class="mx-auto w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 6h18M5 18h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                <h4 class="text-lg font-semibold text-gray-800 mb-2">No bookings yet</h4>
-                <p class="text-gray-600 mb-4">You don't have any bookings. Use the "Book a Resource" link on the Home page to create one.</p>
-                <a href="home.html" class="inline-block bg-ashesi-maroon text-white font-semibold py-2 px-4 rounded-lg hover:bg-ashesi-maroon/90 transition">Go to Home</a>
+              <div class="flex flex-col items-end gap-2">
+                <button class="text-ashesi-maroon border border-ashesi-maroon rounded-full px-3 py-1 text-sm hover:bg-ashesi-maroon hover:text-white transition">View</button>
+                <button class="text-red-600 border border-red-200 rounded-full px-3 py-1 text-sm hover:bg-red-50 transition">Cancel</button>
               </div>
             </div>
-          </div>
+            <?php } // End of while loop ?>
 
-          <!-- Sidebar summary column -->
-          <aside class="bg-white p-6 rounded-xl shadow border border-gray-100 h-fit">
+            <!-- Empty state (shown if no bookings were found) -->
+            <div id="empty-state" class="<?php if ($hasBookings) echo 'hidden'; ?> bg-white p-8 rounded-xl shadow border border-gray-100 text-center">
+              <svg class="mx-auto w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 6h18M5 18h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+              <h4 class="text-lg font-semibold text-gray-800 mb-2">No bookings yet</h4>
+              <p class="text-gray-600 mb-4">You don't have any bookings. Use the "Book a Resource" link on the Home page to create one.</p>
+              <a href="home.php" class="inline-block bg-ashesi-maroon text-white font-semibold py-2 px-4 rounded-lg hover:bg-ashesi-maroon/90 transition">Go to Home</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar summary column -->
+        <aside class="bg-white p-6 rounded-xl shadow border border-gray-100 h-fit">
             <h4 class="text-lg font-semibold text-gray-800 mb-3">Booking Summary</h4>
             <ul class="text-sm text-gray-600 space-y-3">
               <li>Total bookings: <span class="font-medium text-gray-800">1</span></li>
@@ -107,12 +146,10 @@
               <li>Past: <span class="font-medium text-gray-800">0</span></li>
             </ul>
             <div class="mt-6">
-              <a href="home.html" class="block text-center bg-ashesi-maroon text-white font-semibold py-2 px-4 rounded-lg hover:bg-ashesi-maroon/90 transition">Book a Resource</a>
+              <a href="home.php" class="inline-block bg-ashesi-maroon text-white font-semibold py-2 px-4 rounded-lg hover:bg-ashesi-maroon/90 transition">Book a Resource</a>
             </div>
-          </aside>
-        </section>
+        </aside>
       </section>
-
       <!-- Map View (Hidden by default) -->
       <section id="map-view" class="hidden flex-1 h-full flex flex-col">
         <h2 class="text-2xl font-bold text-gray-800 mb-6">Interactive Campus Map</h2>

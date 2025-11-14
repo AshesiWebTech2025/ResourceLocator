@@ -47,6 +47,19 @@ function connectDB(){
             is_bookable BOOLEAN DEFAULT 0,
             FOREIGN KEY (type_id) REFERENCES resource_types(type_id))");
 
+        //4. Bookings Table
+        $db->exec("CREATE TABLE IF NOT EXISTS Bookings (
+            booking_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            resource_id INTEGER,
+            user_id INTEGER,
+            start_time TIMESTAMP NOT NULL,
+            end_time TIMESTAMP NOT NULL,
+            purpose TEXT,
+            status TEXT CHECK(status IN ('Confirmed', 'Cancelled', 'Completed')) DEFAULT 'Confirmed',
+            FOREIGN KEY (resource_id) REFERENCES resources(resource_id),
+            FOREIGN KEY (user_id) REFERENCES users(user_id)
+        )");
+
         
         
         return $db; 

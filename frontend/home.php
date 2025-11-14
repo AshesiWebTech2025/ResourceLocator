@@ -31,16 +31,20 @@
 </head>
 <body class="bg-gray-50 font-sans antialiased flex h-screen overflow-hidden">
 
+    <button id="hamburgerBtn" class="hamburger-btn" aria-label="Toggle menu" aria-expanded="false" type="button">
+        <span></span><span></span><span></span>
+    </button>
+
     <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out bg-ashesi-maroon text-white w-64 flex flex-col z-20 shadow-xl">
         <div class="p-6 flex items-center h-16 border-b border-white/20">
             <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
             <span class="text-xl font-semibold">Ashesi Locator</span>
         </div>
         <nav class="flex-grow p-4 space-y-2">
-            <a href="#" id="nav-home" class="flex items-center p-3 rounded-lg bg-white/20 transition duration-150 ease-in-out font-medium">Home</a>
+            <a href="home.php" id="nav-home" class="flex items-center p-3 rounded-lg bg-white/20 transition duration-150 ease-in-out font-medium">Home</a>
             <a href="#" id="nav-map" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Campus Map</a>
-            <a href="bookings.html" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">My Bookings</a>
-            <a href="about.html" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">About</a>
+            <a href="bookings.php" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">My Bookings</a>
+            <a href="about.php" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">About</a>
         </nav>
         <div class="p-4 space-y-2 border-t border-white/20">
             <a href="#" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Settings</a>
@@ -66,7 +70,7 @@
                 <section class="bg-white p-8 rounded-xl shadow-lg mb-10 border border-gray-100">
                     <h2 class="text-3xl font-bold text-gray-900 mb-3">Welcome to the Ashesi Resource Locator</h2>
                     <p class="text-lg text-gray-600 mb-6">Your one-stop portal to find and book campus resources, from study rooms to faculty office hours and support services.</p>
-                    <a href="bookings.html" class="inline-block bg-ashesi-maroon text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:bg-ashesi-maroon/90 transition duration-200">Book a Resource</a>
+                    <a href="bookings.php" class="inline-block bg-ashesi-maroon text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:bg-ashesi-maroon/90 transition duration-200">Book a Resource</a>
                 </section>
 
                 <section>
@@ -149,7 +153,7 @@
                         <ul class="space-y-1 text-gray-600">
                             <li><a href="#" class="hover:text-ashesi-maroon">Resources</a></li>
                             <li><a href="#" class="hover:text-ashesi-maroon">Campus Map</a></li>
-                            <li><a href="bookings.html" class="hover:text-ashesi-maroon">My Bookings</a></li>
+                            <li><a href="bookings.php" class="hover:text-ashesi-maroon">My Bookings</a></li>
                         </ul>
                     </div>
                     <div>
