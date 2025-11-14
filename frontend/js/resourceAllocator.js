@@ -143,32 +143,24 @@ $(document).ready(function() {
     // Handle map clicks for coordinates
     if (window.mapInstance) {
         mapInstance.on("click", function (e) {
-            let lng = e.lngLat.lng;
-            let lat = e.lngLat.lat;
+        let lng = e.lngLat.lng;
+        let lat = e.lngLat.lat;
 
-            // Round to 5 decimals first
-            lng = Number(lng.toFixed(5));
-            lat = Number(lat.toFixed(5));
+        // Round to 5 decimals
+        const nearestLat = Number(lat.toFixed(5));
+        const nearestLng = Number(lng.toFixed(5));
 
-            // Define the allowed ranges (example based on your previous message)
-            const validLats = [5.76469, 5.7647];
-            const validLngs = [-0.23, -0.20]; // adjust to your exact allowed values
+        // Remove previous marker
+        if (window.resourceMarker) window.resourceMarker.remove();
 
-            // Snap to nearest valid value
-            const nearestLat = validLats.reduce((a, b) => Math.abs(b - lat) < Math.abs(a - lat) ? b : a);
-            const nearestLng = validLngs.reduce((a, b) => Math.abs(b - lng) < Math.abs(a - lng) ? b : a);
+        window.resourceMarker = new mapboxgl.Marker({ color: "#FF0000" })
+            .setLngLat([nearestLng, nearestLat])
+            .addTo(mapInstance);
 
-            // Remove previous marker
-            if (window.resourceMarker) window.resourceMarker.remove();
-
-            window.resourceMarker = new mapboxgl.Marker({ color: "#FF0000" })
-                .setLngLat([nearestLng, nearestLat])
-                .addTo(mapInstance);
-
-            // Fill the form with snapped values
-            $("#latitude").val(nearestLat);
-            $("#longitude").val(nearestLng);
-});
+        // Fill the form dynamically with clicked coordinates
+        $("#latitude").val(nearestLat);
+        $("#longitude").val(nearestLng);
+    });
 
     }
 

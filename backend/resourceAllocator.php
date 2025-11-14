@@ -15,10 +15,10 @@ $name = trim($_POST['name'] ?? '');
 $type = trim($_POST['type'] ?? '');
 $capacity = intval($_POST['capacity'] ?? 0);
 $description = trim($_POST['description'] ?? '');
-$latitude = trim($_POST['latitude'] ?? '');
-$longitude = trim($_POST['longitude'] ?? '');
+$latitude = isset($_POST['latitude']) ? round(floatval($_POST['latitude']), 5) : null;
+$longitude = isset($_POST['longitude']) ? round(floatval($_POST['longitude']), 5) : null;
 
-if (!$name || !$type || !$description || !$latitude || !$longitude) {
+if (!$name || !$type || !$description || !$latitude || !$longitude === null) {
     http_response_code(400);
     die("All fields including map location are required.");
 }
@@ -29,11 +29,26 @@ if (!$db) {
     die("Database connection failed.");
 }
 
-// Insert into database
-$sql = "INSERT INTO resources (name, type, capacity, description, latitude, longitude)
-        VALUES (:name, :type, :capacity, :description, :lat, :lng)";
 
 try {
+    // Get type_id from resource_types
+    $typeStmt = $db->prepare("SELECT type_id FROM resource_types WHERE type_name = :type");
+    $typeStmt->bindValue(':type', $type, SQLITE3_TEXT);
+    $typeResult = $typeStmt->execute();
+    $typeRow = $typeResult->fetchArray(SQLITE3_ASSOC);
+
+    if (!$typeRow) {
+        http_response_code(400);
+        die("Invalid resource type.");
+    }
+
+    $type_id = $typeRow['type_id'];
+
+
+    // Insert into database
+    $sql = "INSERT INTO resources (name, type_id, capacity, description, latitude, longitude)
+        VALUES (:name, :type_id, :capacity, :description, :lat, :lng)";
+
     $stmt = $db->prepare($sql);
     $stmt->bindValue(':name', $name, SQLITE3_TEXT);
     $stmt->bindValue(':type', $type, SQLITE3_TEXT);
