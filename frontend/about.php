@@ -177,7 +177,7 @@
                     <div class="space-y-4">
                         <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
                             <h4 class="font-bold text-purple-800 mb-2">Database</h4>
-                            <p class="text-gray-700 mb-2">MySQL via phpMyAdmin</p>
+                            <p class="text-gray-700 mb-2">SQLite (may transition to MySQL via phpMyAdmin)</p>
                             <p class="text-sm text-gray-600 font-semibold mb-1">Stores:</p>
                             <ul class="space-y-1 text-gray-600 text-sm">
                                 <li>• Resource details</li>
@@ -244,7 +244,7 @@
                     </div>
                     <div class="flex items-start p-4 bg-gray-50 rounded-lg">
                         <span class="text-2xl mr-3">✓</span>
-                        <p class="text-gray-700">How to integrate Mapbox and combine it with PHP–MySQL workflows</p>
+                        <p class="text-gray-700">How to integrate Mapbox and combine it with PHP–SQLite workflows</p>
                     </div>
                     <div class="flex items-start p-4 bg-gray-50 rounded-lg">
                         <span class="text-2xl mr-3">✓</span>
@@ -266,7 +266,13 @@
                     </div>
                     <div class="border-l-4 border-green-500 pl-6 py-3">
                         <h4 class="font-bold text-lg text-green-800 mb-2">Eyram-Makafui Awoye</h4>
+                        <h5 class ="text-gray-700">Sprint 1</h5>
                         <p class="text-gray-700">Implemented the UI of Ashesi Campus Resource Locator's front end, creating responsive 'Home' and 'Bookings' pages through the use of HTML and Tailwind CSS. Created a consistent interface and navigation system, including a collapsible sidebar for mobile, a fixed sidebar on desktop, and a header on top that displays page titles and action buttons on each page. Implemented the basic pages' elements, including 'Home'—featuring a hero section for greeting, feature cards, and 'about' information on a dedicated 'Footer' section, and 'Booking'—featuring 'Booking' list section, 'empty' section, and summary section on its 'Sidebar.' Additionally, configured and customized Tailwind CSS settings for branding colors and font, offering a fully 'modern,' 'Accessible,' and 'Interactive' interface that supports 'hover' effects and 'Smooth' page transition and navigation, along with added 'light' functionality for 'JAVASCRIPT.'</p>
+                        <br>
+                        <h5 class ="text-gray-700">Sprint 2</h5>
+                        <p class="text-gray-700">For this part of the project, I focused on integrating the database with the site's main pages. I started by refining dbConnector.php, making sure the table creation matched my ERD and setting up the database structure properly for the rest of the application. After that, I updated bookings.php so it connects to the database and retrieves bookings for a sample user. This allowed me to test the booking functionality even without full user authentication in place. I then worked on home.php, setting up the page to load and display a list of bookable resources directly from the database. This confirmed that the database connection works correctly and that the site can now serve dynamic content instead of hard-coded information. Finally, I checked about.php, which is mainly a static page. Since it doesn’t need any database interaction, I left it unchanged.</p>
+
+
                     </div>
                     <div class="border-l-4 border-purple-500 pl-6 py-3">
                         <h4 class="font-bold text-lg text-purple-800 mb-2">Eyra Inez Agbenu</h4>
@@ -274,7 +280,11 @@
                     </div>
                     <div class="border-l-4 border-orange-500 pl-6 py-3">
                         <h4 class="font-bold text-lg text-orange-800 mb-2">Kharis Ewurabena Dadzie</h4>
+                        <h5 class ="text-gray-700">Sprint 1</h5>
                         <p class="text-gray-700">Implemented the resource allocator page which is viewed by the admin. This page is where the admin adds a new resource available on campus to be able to viewed by students, visitors and others. Making use of Map.js, created a map of the school where the admin clicks on a particular location in school where the new resource can be found. Using jQuery, developed a form that slides in from the right where the admin then enters the resource's name, the capacity (if applicable) and a brief description of the resource. When the admin clicks 'Save', the data will be entered into the database and then, users like students will be able to locate this new resource on the Ashesi map and view details about it.</p>
+                        <br>
+                        <h5 class ="text-gray-700">Sprint 2</h5>
+                        <p class ='text-gray-700'>For this sprint, I was responsible for creating the resources and resource_types tables that the resourceAllocator.html would be sending data to. I moved all Javascript code relating to the actions on that html page into resourceAllocator.js. This handles receving input from the map to populate the newly added longitude and latitude fields in the resource allocator form. I created a link to a modal for adding new resource types as well. I created resourceAllocator.php to process input from the form and insert it into the database. I also added addType.php and getType.php for inserting new types into the database and retrieving current types listed in the database to dynamically update the dropdown type menu respectively.</p>
                     </div>
                 </div>
             </section>
