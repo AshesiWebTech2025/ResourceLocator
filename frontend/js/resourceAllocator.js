@@ -142,11 +142,11 @@ $(document).ready(function() {
 
     // Handle map clicks for coordinates
     if (window.mapInstance) {
-        mapInstance.on("click", function(e) {
+        mapInstance.on("click", function (e) {
             let lng = e.lngLat.lng;
             let lat = e.lngLat.lat;
 
-            // Round to 5 decimals for the form
+            // Round to 5 decimals
             lng = Number(lng.toFixed(5));
             lat = Number(lat.toFixed(5));
 
@@ -157,12 +157,15 @@ $(document).ready(function() {
                 .setLngLat([lng, lat])
                 .addTo(mapInstance);
 
+            // Clamp coordinates to valid range
             const latClamped = Math.min(Math.max(lat, 5.74), 5.77);
             const lngClamped = Math.min(Math.max(lng, -0.23), -0.20);
 
-            $("#latitude").val(lat);
-            $("#longitude").val(lng);
+            // Fill the form with clamped values
+            $("#latitude").val(latClamped);
+            $("#longitude").val(lngClamped);
         });
+
     }
 
     // Submit form via AJAX
