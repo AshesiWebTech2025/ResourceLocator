@@ -129,7 +129,7 @@ $(document).ready(function() {
 
     // Load resource types from the backend
     function loadResourceTypes() {
-        $.get("backend/getTypes.php", function(data) {
+        $.get("../backend/getTypes.php", function(data) {
             $typeSelect.empty();
             $typeSelect.append('<option value="" disabled selected>Select the type</option>');
             data.forEach(type => {
@@ -187,7 +187,7 @@ $(document).ready(function() {
             return;
         }
 
-        $.post("backend/resourceAllocator.php", {
+        $.post("../backend/resourceAllocator.php", {
             name, type, capacity, description, latitude, longitude
         }, function(response) {
             alert(response);
