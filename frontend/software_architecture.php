@@ -52,7 +52,7 @@ if (!isset($_SESSION['user_id'])) {
         </nav>
         <div class="p-4 space-y-2 border-t border-white/20">
             <a href="#" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Settings</a>
-            <a href="#" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Sign Out</a>
+            <a href="login_signup.php" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Sign Out</a>
         </div>
     </aside>
 
