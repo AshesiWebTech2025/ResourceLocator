@@ -41,7 +41,7 @@
             <span class="text-xl font-semibold">Ashesi Locator</span>
         </div>
         <nav class="flex-grow p-4 space-y-2">
-            <a href="home.php" id="nav-home" class="flex items-center p-3 rounded-lg bg-white/20 transition duration-150 ease-in-out font-medium">Home</a>
+            <a href="home.php" id="nav-home" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Home</a>
             <a href="#" id="nav-map" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Campus Map</a>
             <a href="bookings.php" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">My Bookings</a>
             <a href="about.php" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">About</a>
