@@ -43,8 +43,12 @@
                 Resource Allocator
             </a>
             <a href="available_sessions.html"
-                class="flex items-center p-3 rounded-lg bg-white/20 transition duration-150 ease-in-out font-medium">
+                class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">
                 Available Sessions
+            </a>
+            <a href="software_architecture.html"
+                class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">
+                Architecture
             </a>
             <a href="#"
                 class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Analytics</a>
@@ -285,8 +289,6 @@
             ];
             renderList();
 
-            // BACKEND: fetch resources list and replace hotspots
-            // GET ../backend/available_sessions.php?action=getResources
             fetch('../backend/available_sessions.php?action=getResources')
                 .then(r => r.json())
                 .then(json => {

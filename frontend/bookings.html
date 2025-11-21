@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -36,23 +37,37 @@
   <!-- App script (defer to let DOM load) -->
   <script src="./js/main.js" defer></script>
 </head>
+
 <body class="bg-gray-50 font-sans antialiased flex h-screen overflow-hidden">
 
-  <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out bg-ashesi-maroon text-white w-64 flex flex-col z-20 shadow-xl">
-      <div class="p-6 flex items-center h-16 border-b border-white/20">
-          <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
-          <span class="text-xl font-semibold">Ashesi Locator</span>
-      </div>
-      <nav class="flex-grow p-4 space-y-2">
-            <a href="home.php" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Home</a>
-            <a href="resourceLocator.php" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Campus Map</a>
-            <a href="bookings.html" id="nav-bookings" class="flex items-center p-3 rounded-lg bg-white/20 transition duration-150 ease-in-out font-medium">My Bookings</a>
-            <a href="about.html" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">About</a>
-        </nav>
-      <div class="p-4 space-y-2 border-t border-white/20">
-          <a href="#" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Settings</a>
-          <a href="login_signup.php" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Sign Out</a>
-      </div>
+  <aside id="sidebar"
+    class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out bg-ashesi-maroon text-white w-64 flex flex-col z-20 shadow-xl">
+    <div class="p-6 flex items-center h-16 border-b border-white/20">
+      <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
+      </svg>
+      <span class="text-xl font-semibold">Ashesi Locator</span>
+    </div>
+    <nav class="flex-grow p-4 space-y-2">
+      <a href="home.php"
+        class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Home</a>
+      <a href="resourceLocator.php"
+        class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Campus
+        Map</a>
+      <a href="bookings.html" id="nav-bookings"
+        class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">My
+        Bookings</a>
+      <a href="about.html"
+        class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">About</a>
+    </nav>
+    <div class="p-4 space-y-2 border-t border-white/20">
+      <a href="#"
+        class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Settings</a>
+      <a href="login_signup.php"
+        class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Sign
+        Out</a>
+    </div>
   </aside>
 
   <div class="flex-1 flex flex-col overflow-y-auto main-content">
@@ -60,9 +75,13 @@
       <h1 class="text-xl md:text-2xl font-semibold text-gray-800">My Bookings</h1>
       <div class="flex items-center gap-4">
         <!-- New Button to trigger booking -->
-        <button id="open-booking-modal" class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition">Book New Resource</button>
+        <button id="open-booking-modal"
+          class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition">Book New
+          Resource</button>
         <!-- Original toggle button -->
-        <button id="toggle-btn" class="bg-ashesi-maroon text-white font-semibold py-2 px-4 rounded-lg hover:bg-ashesi-maroon/90 transition">Toggle Map View</button>
+        <button id="toggle-btn"
+          class="bg-ashesi-maroon text-white font-semibold py-2 px-4 rounded-lg hover:bg-ashesi-maroon/90 transition">Toggle
+          Map View</button>
       </div>
     </header>
 
@@ -82,10 +101,16 @@
 
               <!-- Empty state (hidden when bookings exist) -->
               <div id="empty-state" class="hidden bg-white p-8 rounded-xl shadow border border-gray-100 text-center">
-                <svg class="mx-auto w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 6h18M5 18h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                <svg class="mx-auto w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 10h18M3 6h18M5 18h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
                 <h4 class="text-lg font-semibold text-gray-800 mb-2">No bookings yet</h4>
                 <p class="text-gray-600 mb-4">You don't have any bookings. Click "Book New Resource" to create one.</p>
-                <button id="open-booking-modal-2" class="inline-block bg-ashesi-maroon text-white font-semibold py-2 px-4 rounded-lg hover:bg-ashesi-maroon/90 transition">Book a Resource</button>
+                <button id="open-booking-modal-2"
+                  class="inline-block bg-ashesi-maroon text-white font-semibold py-2 px-4 rounded-lg hover:bg-ashesi-maroon/90 transition">Book
+                  a Resource</button>
               </div>
             </div>
           </div>
@@ -99,7 +124,9 @@
               <li>Past: <span id="past-bookings-count" class="font-medium text-gray-800">0</span></li>
             </ul>
             <div class="mt-6">
-              <button id="open-booking-modal-3" class="block text-center bg-ashesi-maroon text-white font-semibold py-2 px-4 rounded-lg hover:bg-ashesi-maroon/90 transition">Book a Resource</button>
+              <button id="open-booking-modal-3"
+                class="block text-center bg-ashesi-maroon text-white font-semibold py-2 px-4 rounded-lg hover:bg-ashesi-maroon/90 transition">Book
+                a Resource</button>
             </div>
           </aside>
         </section>
@@ -114,25 +141,29 @@
             <div id="ashesi-map" class="w-full h-full"></div>
           </div>
           <!-- Resource search/list view -->
-          <div class="lg:col-span-1 bg-white p-4 rounded-xl shadow-lg border border-gray-100 flex flex-col overflow-hidden">
+          <div
+            class="lg:col-span-1 bg-white p-4 rounded-xl shadow-lg border border-gray-100 flex flex-col overflow-hidden">
             <h3 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Find a Resource</h3>
             <!-- Search Input -->
             <div class="mb-4">
               <input type="text" placeholder="Search by name, type, or capacity..."
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-ashesi-maroon focus:border-ashesi-maroon transition duration-150">
-            </div>                        
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-ashesi-maroon focus:border-ashesi-maroon transition duration-150">
+            </div>
             <!-- Scrollable resource list -->
             <div class="flex-1 overflow-y-auto space-y-3 pr-2">
               <!-- Dummy resources -->
-              <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-ashesi-light transition duration-150">
+              <div
+                class="p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-ashesi-light transition duration-150">
                 <p class="font-semibold text-gray-800">KRB 101</p>
                 <p class="text-sm text-gray-500">Classroom | Capacity: 40</p>
-              </div>                            
-              <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-ashesi-light transition duration-150">
+              </div>
+              <div
+                class="p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-ashesi-light transition duration-150">
                 <p class="font-semibold text-gray-800">Conference Hall A</p>
                 <p class="text-sm text-gray-500">Conference Hall | Capacity: 200</p>
               </div>
-              <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-ashesi-light transition duration-150">
+              <div
+                class="p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-ashesi-light transition duration-150">
                 <p class="font-semibold text-gray-800">Engineering Seminar Room</p>
                 <p class="text-sm text-gray-500">Seminar Room | Capacity: 15</p>
               </div>
@@ -153,70 +184,75 @@
   </div>
 
   <!-- Booking Modal -->
-  <div id="booking-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden z-50 overflow-y-auto" aria-modal="true" role="dialog">
-      <div class="flex min-h-screen items-end justify-center p-4 text-center sm:items-center sm:p-0">
-          <div class="relative w-full max-w-lg transform overflow-hidden rounded-xl bg-white p-6 text-left shadow-xl transition-all my-8">
-              <!-- Modal Header -->
-              <div class="flex items-center justify-between border-b pb-3 mb-4">
-                  <h3 class="text-xl font-semibold text-gray-900">Book New Resource</h3>
-                  <button id="close-booking-modal" type="button" class="text-gray-400 hover:text-gray-600 transition">
-                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                  </button>
-              </div>
+  <div id="booking-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden z-50 overflow-y-auto" aria-modal="true"
+    role="dialog">
+    <div class="flex min-h-screen items-end justify-center p-4 text-center sm:items-center sm:p-0">
+      <div
+        class="relative w-full max-w-lg transform overflow-hidden rounded-xl bg-white p-6 text-left shadow-xl transition-all my-8">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between border-b pb-3 mb-4">
+          <h3 class="text-xl font-semibold text-gray-900">Book New Resource</h3>
+          <button id="close-booking-modal" type="button" class="text-gray-400 hover:text-gray-600 transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
 
-              <!-- Booking Form -->
-              <form id="new-booking-form">
-                  <div class="space-y-4">
-                      <!-- Resource Selector (Simplified for this example) -->
-                      <div>
-                          <label for="resource_id" class="block text-sm font-medium text-gray-700 mb-1">Resource</label>
-                          <select id="resource_id" name="resource_id" required 
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-ashesi-maroon focus:border-ashesi-maroon">
-                              <!-- These IDs and Names must match data in your 'resources' table -->
-                              <option value="">-- Select a Resource --</option>
-                              <option value="1">Group Study Room 204 (KRB)</option>
-                              <option value="2">KRB Computer Lab A</option>
-                              <option value="3">Conference Hall B</option>
-                          </select>
-                          <input type="hidden" name="resource_name" id="resource_name">
-                      </div>
+        <!-- Booking Form -->
+        <form id="new-booking-form">
+          <div class="space-y-4">
+            <!-- Resource Selector (Simplified for this example) -->
+            <div>
+              <label for="resource_id" class="block text-sm font-medium text-gray-700 mb-1">Resource</label>
+              <select id="resource_id" name="resource_id" required
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-ashesi-maroon focus:border-ashesi-maroon">
+                <!-- These IDs and Names must match data in your 'resources' table -->
+                <option value="">-- Select a Resource --</option>
+                <option value="1">Group Study Room 204 (KRB)</option>
+                <option value="2">KRB Computer Lab A</option>
+                <option value="3">Conference Hall B</option>
+              </select>
+              <input type="hidden" name="resource_name" id="resource_name">
+            </div>
 
-                      <!-- Start Time -->
-                      <div>
-                          <label for="start_time" class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
-                          <input type="datetime-local" id="start_time" name="start_time" required 
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-ashesi-maroon focus:border-ashesi-maroon">
-                      </div>
+            <!-- Start Time -->
+            <div>
+              <label for="start_time" class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+              <input type="datetime-local" id="start_time" name="start_time" required
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-ashesi-maroon focus:border-ashesi-maroon">
+            </div>
 
-                      <!-- End Time -->
-                      <div>
-                          <label for="end_time" class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
-                          <input type="datetime-local" id="end_time" name="end_time" required 
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-ashesi-maroon focus:border-ashesi-maroon">
-                      </div>
-                  </div>
-
-                  <!-- Message Area -->
-                  <div id="booking-message" class="text-center text-sm mt-3"></div>
-
-                  <!-- Submit Button -->
-                  <div class="mt-6">
-                      <button id="book-submit-btn" type="submit"
-                          class="w-full bg-ashesi-maroon text-white font-semibold py-3 px-4 rounded-lg hover:bg-ashesi-maroon/90 transition">
-                          Confirm Booking
-                      </button>
-                  </div>
-              </form>
-              
-              <script>
-                  // Auto-update hidden resource_name field when resource_id changes
-                  document.getElementById('resource_id').addEventListener('change', function() {
-                      const selectedOption = this.options[this.selectedIndex];
-                      document.getElementById('resource_name').value = selectedOption.text.split('(')[0].trim();
-                  });
-              </script>
+            <!-- End Time -->
+            <div>
+              <label for="end_time" class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+              <input type="datetime-local" id="end_time" name="end_time" required
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-ashesi-maroon focus:border-ashesi-maroon">
+            </div>
           </div>
+
+          <!-- Message Area -->
+          <div id="booking-message" class="text-center text-sm mt-3"></div>
+
+          <!-- Submit Button -->
+          <div class="mt-6">
+            <button id="book-submit-btn" type="submit"
+              class="w-full bg-ashesi-maroon text-white font-semibold py-3 px-4 rounded-lg hover:bg-ashesi-maroon/90 transition">
+              Confirm Booking
+            </button>
+          </div>
+        </form>
+
+        <script>
+          // Auto-update hidden resource_name field when resource_id changes
+          document.getElementById('resource_id').addEventListener('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+            document.getElementById('resource_name').value = selectedOption.text.split('(')[0].trim();
+          });
+        </script>
       </div>
+    </div>
   </div>
   <!-- End Booking Modal -->
 
@@ -226,7 +262,7 @@
   <script src="./js/bookings.js"></script>
   <script>
     // View switching for bookings.html
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       const toggleBtn = document.getElementById('toggle-btn');
       const bookingsView = document.getElementById('bookings-view');
       const mapView = document.getElementById('map-view');
@@ -241,7 +277,7 @@
         bookingsView.classList.add('hidden');
         mapView.classList.remove('hidden');
         toggleBtn.textContent = 'Toggle Bookings View';
-        
+
         // Resize map if it exists
         if (window.mapInstance) {
           setTimeout(() => {
@@ -249,10 +285,10 @@
           }, 100);
         }
       }
-      
+
       if (toggleBtn) {
         let isMapView = false;
-        toggleBtn.addEventListener('click', function(e) {
+        toggleBtn.addEventListener('click', function (e) {
           e.preventDefault();
           if (isMapView) {
             showBookingsView();
@@ -265,13 +301,13 @@
 
       // Initialize the correct view on page load
       showBookingsView();
-      
+
       // Mirror the modal open functionality for all three buttons
       const openModalBtn = document.getElementById('open-booking-modal');
       const openModalBtn2 = document.getElementById('open-booking-modal-2');
       const openModalBtn3 = document.getElementById('open-booking-modal-3');
       const modal = document.getElementById('booking-modal');
-      
+
       const openModal = () => modal.classList.remove('hidden');
 
       if (openModalBtn) openModalBtn.addEventListener('click', openModal);
@@ -280,4 +316,5 @@
     });
   </script>
 </body>
+
 </html>

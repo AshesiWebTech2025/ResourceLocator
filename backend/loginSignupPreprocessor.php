@@ -50,17 +50,17 @@ if ($action === "login") {
                         //routing users based on roles. for now all rols go to resouceLocator.html 
                         switch ($user["role"]) {
                             case "Student":
-                                header("Location: ../frontend/resourceLocator.html");
+                                header("Location: ../frontend/resourceLocator.php");
                                 exit();
                             case "Faculty":
                             case "Staff":
-                                header("Location: ../frontend/resourceLocator.html");
+                                header("Location: ../frontend/resourceLocator.php");
                                 exit();
                             case "Admin":
                                 header("Location: ../frontend/resourceAllocator.html");
                                 exit();
                             default:
-                                header('Location: ../frontend/resourceLocator.html');
+                                header('Location: ../frontend/resourceLocator.php');
                                 exit();
                         }
                     } else {
