@@ -285,8 +285,6 @@
             ];
             renderList();
 
-            // BACKEND: fetch resources list and replace hotspots
-            // GET ../backend/available_sessions.php?action=getResources
             fetch('../backend/available_sessions.php?action=getResources')
                 .then(r => r.json())
                 .then(json => {
