@@ -1,3 +1,28 @@
+<?php
+    // Fetch available resources from database
+    require_once '../backend/dbConnector.php';
+    $db = connectDB();
+    $resources = [];
+    
+    if ($db) {
+        $stmt = $db->prepare("
+            SELECT r.resource_id, r.name, r.capacity, r.description, rt.type_name
+            FROM Resources r
+            JOIN Resource_Types rt ON r.type_id = rt.type_id
+            WHERE r.is_bookable = 1
+            ORDER BY rt.type_name, r.name
+        ");
+        
+        if ($stmt) {
+            $results = $stmt->execute();
+            if ($results) {
+                while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+                    $resources[] = $row;
+                }
+            }
+        }
+    }
+?>
 <!DOCTYPE html>
 <html lang="en">
     
@@ -70,7 +95,7 @@
                 <section class="bg-white p-8 rounded-xl shadow-lg mb-10 border border-gray-100">
                     <h2 class="text-3xl font-bold text-gray-900 mb-3">Welcome to the Ashesi Resource Locator</h2>
                     <p class="text-lg text-gray-600 mb-6">Your one-stop portal to find and book campus resources, from study rooms to faculty office hours and support services.</p>
-                    <a href="bookings.php" class="inline-block bg-ashesi-maroon text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:bg-ashesi-maroon/90 transition duration-200">Book a Resource</a>
+                    <button onclick="openBookingModal()" class="inline-block bg-ashesi-maroon text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:bg-ashesi-maroon/90 transition duration-200">Book a Resource</button>
                 </section>
 
                 <section>
@@ -171,8 +196,109 @@
         </footer>
     </div>
 
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center">
+                <h3 class="text-2xl font-bold text-gray-900">Book a Resource</h3>
+                <button onclick="closeBookingModal()" class="text-gray-400 hover:text-gray-600 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form action="../backend/create_booking.php" method="POST" class="p-6 space-y-4">
+                <!-- Resource Selection Dropdown -->
+                <div>
+                    <label for="resource_id" class="block text-sm font-medium text-gray-700 mb-2">Select Resource</label>
+                    <select name="resource_id" id="resource_id" required 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ashesi-maroon focus:border-ashesi-maroon transition">
+                        <option value="">-- Choose a resource --</option>
+                        <?php 
+                            $currentType = '';
+                            foreach ($resources as $resource): 
+                                if ($currentType !== $resource['type_name']) {
+                                    if ($currentType !== '') echo '</optgroup>';
+                                    echo '<optgroup label="' . htmlspecialchars($resource['type_name']) . '">';
+                                    $currentType = $resource['type_name'];
+                                }
+                        ?>
+                            <option value="<?php echo $resource['resource_id']; ?>">
+                                <?php echo htmlspecialchars($resource['name']); ?> (Capacity: <?php echo $resource['capacity']; ?>)
+                            </option>
+                        <?php 
+                            endforeach; 
+                            if ($currentType !== '') echo '</optgroup>';
+                        ?>
+                    </select>
+                </div>
+
+                <!-- Date Selection -->
+                <div>
+                    <label for="booking_date" class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                    <input type="date" name="booking_date" id="booking_date" required
+                           min="<?php echo date('Y-m-d'); ?>"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ashesi-maroon focus:border-ashesi-maroon transition">
+                </div>
+
+                <!-- Time Selection -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="start_time" class="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
+                        <input type="time" name="start_time" id="start_time" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ashesi-maroon focus:border-ashesi-maroon transition">
+                    </div>
+                    <div>
+                        <label for="end_time" class="block text-sm font-medium text-gray-700 mb-2">End Time</label>
+                        <input type="time" name="end_time" id="end_time" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ashesi-maroon focus:border-ashesi-maroon transition">
+                    </div>
+                </div>
+
+                <!-- Purpose -->
+                <div>
+                    <label for="purpose" class="block text-sm font-medium text-gray-700 mb-2">Purpose</label>
+                    <textarea name="purpose" id="purpose" rows="3" required
+                              placeholder="e.g., Group study session, Project meeting..."
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ashesi-maroon focus:border-ashesi-maroon transition"></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeBookingModal()"
+                            class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="flex-1 px-4 py-2 bg-ashesi-maroon text-white rounded-lg hover:bg-ashesi-maroon/90 transition font-semibold">
+                        Book Resource
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="./js/map.js"></script>
     <script src="./js/main.js"></script>
+    <script>
+        function openBookingModal() {
+            document.getElementById('bookingModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeBookingModal() {
+            document.getElementById('bookingModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('bookingModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeBookingModal();
+            }
+        });
+    </script>
     <script>
         // View switching for home.html
         document.addEventListener('DOMContentLoaded', function() {
