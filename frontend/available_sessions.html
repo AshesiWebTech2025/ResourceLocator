@@ -16,12 +16,12 @@
     <!-- Load Tailwind Config -->
     <script src="js/tailwindConfig.js"></script>
 
-        <!-- styles css -->
-     <link rel="stylesheet" href="css/style.css">
+    <!-- styles css -->
+    <link rel="stylesheet" href="css/style.css">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
 
-     
+
 </head>
 
 <body class="bg-gray-50 font-sans antialiased flex h-screen overflow-hidden">
@@ -155,8 +155,149 @@
         </div>
     </div>
 
-    
+    <!-- Frontend <> Backend integration script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // mutable hotspot list (will be populated from backend)
+            let hotspots = [];
+            const hotspotList = document.getElementById('hotspot-list');
+            const modal = document.getElementById('sessionModal');
+            const resourceNameEl = document.getElementById('resourceName');
+            const slotList = document.getElementById('slotList');
+            let currentResource = null;
+            const resourceSlots = {}; // in-memory cache of slots per resource
 
+            function renderList() {
+                hotspotList.innerHTML = '';
+                hotspots.forEach(h => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'w-full text-left p-3 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-100 flex items-center justify-between';
+                    btn.innerHTML = `
+                        <div>
+                          <div class="font-medium text-gray-800">${h.name}</div>
+                          <div class="text-xs text-gray-500">${h.tag || ''}</div>
+                        </div>
+                        <div class="text-xs text-ashesi-maroon">Edit</div>`;
+                    btn.addEventListener('click', () => openModal(h));
+                    hotspotList.appendChild(btn);
+                });
+            }
+
+            function renderSlots() {
+                slotList.innerHTML = '';
+                const slots = (currentResource && resourceSlots[currentResource.id]) || [];
+                if (!slots.length) {
+                    slotList.innerHTML = '<li class="text-sm text-gray-500">No slots yet.</li>';
+                    return;
+                }
+                slots.forEach((s, idx) => {
+                    const li = document.createElement('li');
+                    li.className = 'flex items-center justify-between bg-gray-50 p-2 rounded';
+                    li.innerHTML = `<div class="text-sm">${capitalize(s.day)} — ${s.start} to ${s.end}</div><div class="flex gap-2"><button class="text-sm text-ashesi-maroon" data-idx="${idx}">Remove</button></div>`;
+                    li.querySelector('button').addEventListener('click', () => {
+                        resourceSlots[currentResource.id].splice(idx, 1);
+                        renderSlots();
+                    });
+                    slotList.appendChild(li);
+                });
+            }
+
+            function openModal(resource) {
+                currentResource = resource;
+                document.getElementById('modalTitle').textContent = 'Edit Times — ' + resource.name;
+                resourceNameEl.textContent = resource.name;
+                // BACKEND: fetch availability slots for this resource
+                // GET ../backend/available_sessions.php?action=getAvailabilitySlots&resource_id=ID
+                fetch(`../backend/available_sessions.php?action=getAvailabilitySlots&resource_id=${resource.id}`)
+                    .then(r => r.json())
+                    .then(json => {
+                        if (json.success && Array.isArray(json.data)) {
+                            resourceSlots[resource.id] = json.data.map(s => ({ day: s.day_of_week, start: s.start_time, end: s.end_time }));
+                        } else {
+                            resourceSlots[resource.id] = resourceSlots[resource.id] || [];
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Failed to load slots from backend', err);
+                        resourceSlots[resource.id] = resourceSlots[resource.id] || [];
+                    })
+                    .finally(() => {
+                        renderSlots();
+                        $(modal).removeClass('hidden').hide().fadeIn(150);
+                    });
+            }
+
+            function closeModal() {
+                $(modal).fadeOut(150, function () { $(modal).addClass('hidden'); });
+                currentResource = null;
+            }
+
+            function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+            // wire up buttons
+            document.getElementById('addSlot').addEventListener('click', function () {
+                if (!currentResource) return alert('Select a resource first');
+                const day = document.getElementById('daySelect').value;
+                const start = document.getElementById('startTime').value;
+                const end = document.getElementById('endTime').value;
+                if (!start || !end) { return alert('Please enter start and end times'); }
+                if (!resourceSlots[currentResource.id]) resourceSlots[currentResource.id] = [];
+                resourceSlots[currentResource.id].push({ day, start, end });
+                renderSlots();
+            });
+
+            document.getElementById('saveTimes').addEventListener('click', function () {
+                if (!currentResource) return alert('No resource selected');
+                const slots = resourceSlots[currentResource.id] || [];
+                // BACKEND: send updated slots to backend for persistence
+                // POST ../backend/available_sessions.php?action=updateSlots with resource_id and slots(JSON)
+                fetch('../backend/available_sessions.php?action=updateSlots', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ resource_id: currentResource.id, slots: JSON.stringify(slots) })
+                })
+                    .then(r => r.json())
+                    .then(json => {
+                        if (json.success) {
+                            console.log('Slots saved', json);
+                        } else {
+                            console.error('Failed to save slots', json.message);
+                            alert('Failed to save: ' + (json.message || 'unknown'));
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Save error', err);
+                        alert('Network error saving slots');
+                    })
+                    .finally(() => { closeModal(); });
+            });
+
+            document.getElementById('cancelTimes').addEventListener('click', closeModal);
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+
+            // initial render with static data while backend responds
+            hotspots = [
+                { id: 1, name: 'Library - Main Hall', tag: 'library_main', coords: [0, 0] },
+                { id: 2, name: 'Engineering Block - Room 204', tag: 'eng_204', coords: [0, 0] },
+                { id: 3, name: 'Student Center - Seminar Room', tag: 'student_seminar', coords: [0, 0] },
+                { id: 4, name: 'Science Lab - Hotspot A', tag: 'sci_lab_a', coords: [0, 0] }
+            ];
+            renderList();
+
+            // BACKEND: fetch resources list and replace hotspots
+            // GET ../backend/available_sessions.php?action=getResources
+            fetch('../backend/available_sessions.php?action=getResources')
+                .then(r => r.json())
+                .then(json => {
+                    if (json.success && Array.isArray(json.data)) {
+                        hotspots = json.data.map(r => ({ id: r.resource_id, name: r.name, tag: r.type_name || '', coords: [r.longitude, r.latitude] }));
+                        renderList();
+                    }
+                })
+                .catch(err => { console.error('Failed to load resources', err); });
+        });
+    </script>
 
     <script src="js/map.js"></script>
     <!-- load main js -->

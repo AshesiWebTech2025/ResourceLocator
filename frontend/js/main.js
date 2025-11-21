@@ -1,5 +1,5 @@
 //kharis code
-$(document).ready(function () {
+/*$(document).ready(function () {
             const $panel = $("#allocatorSection");
 
             // Open panel when clicking the map
@@ -64,7 +64,9 @@ $(document).ready(function () {
         });
         });
 
-//end of kharis code
+
+
+//end of kharis code*/
 
 
 //start of inez code

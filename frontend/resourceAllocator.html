@@ -8,7 +8,7 @@
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Configure Tailwind for custom colors (matching the maroon/red scheme) and font -->
-    <script src="js/tailwindConfig.js">   
+    <script src="js/tailwindConfig.js">
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <!-- map box integration below-->
@@ -115,8 +115,9 @@
             <h1 class="text-2xl font-semibold text-gray-800 mb-4">Resource Allocator</h1>
 
             <div id="map-container" class="lg:col-span-3 min-h-[300px] lg:min-h-full">
-                <div id="ashesi-map" class="w-full h-[400px] bg-gray-200 flex items-center justify-center text-gray-500 cursor-pointer">
-                  Click anyhwere to simulate mouse click  
+                <div id="ashesi-map"
+                    class="w-full h-[400px] bg-gray-200 flex items-center justify-center text-gray-500 cursor-pointer">
+                    Click anyhwere to simulate mouse click
                 </div>
 
             </div>
@@ -124,12 +125,13 @@
 
             <div id="allocatorSection"
                 class="hidden fixed top-0 right-0 h-full w-80 bg-white shadow-xl border-l border-gray-200 p-6 z-30">
-                <button type="button" class="close-btn absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                <button type="button"
+                    class="close-btn absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
 
                 <h2 class="text-xl font-semibold text-ashesi-maroon mb-4">Allocate a Resource</h2>
 
 
-                <form id="allocatorForm" class="space-y-4 max-w-lg">
+                <form method='POST' action='../backend/resourceAllocator.php' id="allocatorForm" class="space-y-4 max-w-lg">
                     <div>
                         <label for="name" class="block text-gray-700 mb-1">Name:</label>
                         <input type="text" id="name" name="name" required placeholder="Enter resource name"
@@ -141,7 +143,6 @@
                         <select id="type" name="type" required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-ashesi-maroon bg-white">
                             <option value="" disabled selected>Select the type</option>
-                            <option>Default</option>
                         </select>
                     </div>
 
@@ -158,12 +159,61 @@
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-ashesi-maroon">
                     </div>
 
+                    <div>
+                        <label for="latitude" class="block text-gray-700 mb-1">Latitude:</label>
+                        <input type="number" id="latitude" name="latitude" required step="0.00001" min="5.74" max="5.77"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-ashesi-maroon">
+                    </div>
+
+                    <div>
+                        <label for="longitude" class="block text-gray-700 mb-1">Longitude:</label>
+                        <input type="number" id="longitude" name="longitude" required step="0.00001" min="-0.23" max="-0.20"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-ashesi-maroon">
+                    </div>
+
+
+
+
                     <button type="submit" name="submitResource"
                         class="bg-ashesi-maroon text-white px-4 py-2 rounded-md hover:bg-red-800 transition">
                         Save
                     </button>
-                </form>
 
+                    <br>
+                    <br>
+                    <a href="#" id='addTypeLink'
+                        style='display:block; margin-top:5px; color:blue; text-decoration:underline;'>Add a new resource
+                        type</a>
+                </form>
+            </div>
+
+            <div id='typeModal'
+                class='hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50' role="dialog"
+                aria-modal="true" aria-labelledby="modal-title">
+                <div
+                    class="relative top-20 mx-auto p-6 border w-96 shadow-2xl rounded-lg bg-white transform transition-all duration-300 ease-out">
+
+                    <div class="flex justify-between items-center border-b pb-3 mb-4">
+                        <h3 id="modal-title" class="text-xl font-bold text-ashesi-maroon">Add New Resource Type</h3>
+                        <button type="button"
+                            class="close-modal text-gray-400 hover:text-gray-900 rounded-lg text-lg p-1.5 ml-auto inline-flex items-center">
+                            &times; </button>
+                    </div>
+
+                    <form action="../backend/addType.php" method="POST" id="addTypeForm" class="space-y-4">
+                        <div>
+                            <label for="type_name" class="block text-sm font-medium text-gray-700">Type Name:</label>
+                            <input type="text" id="type_name" required placeholder="e.g. Lecture Hall, Lab, Dorm"
+                                class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-ashesi-maroon">
+                        </div>
+                        <div class="flex justify-end pt-2">
+                            <button type="submit"
+                                class="bg-ashesi-maroon text-white px-4 py-2 rounded-md hover:bg-red-800 transition text-sm font-medium">
+                                Save Type
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
         </main>
@@ -206,13 +256,15 @@
         </footer>
     </div>
 
-    <script  src="js/map.js"></script>
-    <!-- load main js -->
-    <script defer src="js/main.js"></script>
-
     <!--JQuery Script for Form Toggle-->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="js/map.js"></script>
+    <!-- load main js -->
+    <script src="js/resourceAllocator.js"></script>
+    <!--<script defer src="js/main.js"></script>-->
+
     
+
 </body>
 
 
