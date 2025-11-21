@@ -61,11 +61,7 @@ if (!isset($_SESSION['user_id'])) {
         <div class="flex-1 flex flex-col overflow-y-auto main-content">
             <header class="bg-white shadow-sm h-16 flex justify-between items-center px-6 md:px-10 sticky top-0 z-10">
                 <h1 class="text-xl md:text-2xl font-semibold text-gray-800">Page Flow</h1>
-                <div class="flex items-center text-ashesi-maroon font-medium border border-ashesi-maroon rounded-full py-1 px-4 cursor-pointer hover:bg-ashesi-maroon hover:text-white transition duration-200">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
+                
             </header>
 
             <main class="p-6 md:p-10 flex-1">
@@ -97,7 +93,7 @@ if (!isset($_SESSION['user_id'])) {
                     </h3>
 
                     <div class="bg-ash-gray p-4 rounded">
-                        <img src="pageflow.jpg" alt="Page Flow Diagram" class="w-full h-auto rounded shadow-sm" />
+                        <img src="images/pageflow.jpg" alt="Page Flow Diagram" class="w-full h-auto rounded shadow-sm" />
                     </div>
                 </section>
 
