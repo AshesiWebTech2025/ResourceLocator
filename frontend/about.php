@@ -270,6 +270,9 @@
                         <br>
                         <h5 class ="text-gray-700">Sprint 2</h5>
                         <p class='text-gray-700'>Created the SQLite database and wrote the dbConnector.php to connect the project to the database. Also created the users table. Worked on the login-sign up backend for user authentication</p>
+                        <br>
+                        <h5 class ="text-gray-700">Sprint 3</h5>
+                        <p class='text-gray-700'>Worked on routing of users.</p>
                     </div>
                     <div class="border-l-4 border-green-500 pl-6 py-3">
                         <h4 class="font-bold text-lg text-green-800 mb-2">Eyram-Makafui Awoye</h4>
@@ -278,6 +281,9 @@
                         <br>
                         <h5 class ="text-gray-700">Sprint 2</h5>
                         <p class="text-gray-700">For this part of the project, I focused on integrating the database with the site's main pages. I started by refining dbConnector.php, making sure the table creation matched my ERD and setting up the database structure properly for the rest of the application. After that, I updated bookings.php so it connects to the database and retrieves bookings for a sample user. This allowed me to test the booking functionality even without full user authentication in place. I then worked on home.php, setting up the page to load and display a list of bookable resources directly from the database. This confirmed that the database connection works correctly and that the site can now serve dynamic content instead of hard-coded information. Finally, I checked about.php, which is mainly a static page. Since it doesn’t need any database interaction, I left it unchanged.</p>
+                        <br>
+                        <h5 class ="text-gray-700">Sprint 3</h5>
+                        <p class='text-gray-700'>Fixed booking page errors</p>
 
 
                     </div>
@@ -286,8 +292,13 @@
                         <p class="text-gray-700">Developed the Admin "Available Sessions" page, which serves as the main interface for managing resource availability across multiple hotspot locations on campus. Designed the full-page layout using HTML and Tailwind CSS including a responsive sidebar with navigation for Resource Allocator, Available Sessions, Analytics, Settings, and Sign Out tabs/pages. Created a dynamic JavaScript-generated hotspot list that displays each resource's name and tag, lets the admin click a hotspot to open the editing modal, and is fully generated from a JavaScript array, making it easy to later connect to backend data. Built a center-aligned interactive modal where administrators can add, remove, and edit time slots for each resource. Implemented all the front-end logic for state management, slot rendering, and modal transitions, and set up the Mapbox container for integration with the team's map script. Overall, provided a functional and responsive interface for managing session availability within the admin dashboard.</p>
                         <br>
                         <h5 class ="text-gray-700">Sprint 2</h5>
-                        <p class ='text-gray-700'>Created an additional entity table, resource_availability, to help  determining the status of a resource and included its attributed in the dbConnector.php file (which houses our database details). That is, to tell which ones are occupied or not and at what times. I then drew our Entity-Relationship Diagram (ERD) which you can access in the root folder of our repository.
+                        <p class ='text-gray-700'>Created an additional entity table, resource_availability, to help  determining the status of a resource and included its attributed in the dbConnector.php file (which houses our database details). That is, to tell which ones are occupied or not and at what times. I then drew our Entity-Relationship Diagram (ERD) which you can access in the root folder of our repository.</p>
+                        <br>
+                        <h5 class ="text-gray-700">Sprint 3</h5>
+                        <p class='text-gray-700'>Worked on software architecture page. Fixed errors with Available Sessions Page</p>
+
                     </div>
+                    
                     <div class="border-l-4 border-orange-500 pl-6 py-3">
                         <h4 class="font-bold text-lg text-orange-800 mb-2">Kharis Ewurabena Dadzie</h4>
                         <h5 class ="text-gray-700">Sprint 1</h5>
@@ -295,6 +306,9 @@
                         <br>
                         <h5 class ="text-gray-700">Sprint 2</h5>
                         <p class ='text-gray-700'>For this sprint, I was responsible for creating the resources and resource_types tables that the resourceAllocator.html would be sending data to. I moved all Javascript code relating to the actions on that html page into resourceAllocator.js. This handles receving input from the map to populate the newly added longitude and latitude fields in the resource allocator form. I created a link to a modal for adding new resource types as well. I created resourceAllocator.php to process input from the form and insert it into the database. I also added addType.php and getType.php for inserting new types into the database and retrieving current types listed in the database to dynamically update the dropdown type menu respectively.</p>
+                        <br>
+                        <h5 class ="text-gray-700">Sprint 3</h5>
+                        <p class='text-gray-700'>Worked on pageflow page. Worked on sidebars</p>
                     </div>
                 </div>
             </section>
