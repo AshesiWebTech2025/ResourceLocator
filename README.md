@@ -79,11 +79,11 @@ This project provided hands-on experience with mapping APIs, PHP–MySQL integra
 
 | Table | Fields |
 |-------|--------|
-| **users** | userID, username, email, password, role |
-| **resources** | resourceID, name, type, capacity, longitude, latitude |
-| **sessions** | sessionID, resourceID, start_time, end_time |
-| **bookings** | bookingID, userID, sessionID |
-| **coordinates** | coordID, resourceID, lat, lng |
+| **users** | user_id, name, ashesi_email, password_hash, is_active, created_at, role |
+| **resources** | resource_id, type_id, name, capacity, description, longitude, latitude, is_bookable |
+| **bookings** | booking_id, user_id, resource_id, start_time, end_time, purpose, status |
+| **resource_availability** | availability_id, resource_id, day_of_week, start_time, end_time, created_at |
+| **resource_types** | type_id, type_name |
 
 This schema supports dynamic resource management, map integration, and booking functionality.
 
@@ -107,7 +107,7 @@ This schema supports dynamic resource management, map integration, and booking f
 
 ## Preview
 <p align="center">
-  <img src="frontend/images/available-sessions.PNG" alt="Admin Dashboard Preview" width="700">
+  <img src="frontend/images/acrl_homePage.PNG" alt="acrl home page" width="700">
 </p>
 
 
