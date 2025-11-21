@@ -34,6 +34,7 @@ if (!isset($_SESSION['user_id'])) {
 </head>
 
 <body class="bg-gray-50 font-sans antialiased min-h-screen">
+    <div class="flex min-h-screen">
 
     <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out bg-ashesi-maroon text-white w-64 flex flex-col z-20 shadow-xl">
         <div class="p-6 flex items-center h-16 border-b border-white/20">
@@ -625,6 +626,7 @@ if (!isset($_SESSION['user_id'])) {
     </section>
 
     </main>
+    </div>
     </div>
 
     <script src="./js/main.js"></script>
