@@ -97,7 +97,7 @@ if (!isset($_SESSION['user_id'])) {
                     </h3>
 
                     <div class="bg-ash-gray p-4 rounded">
-                        <img src="images/ERD-Diagram.PNG" alt="ERD Diagram" class="w-full h-auto rounded shadow-sm" />
+                        <img src="pageflow.jpg" alt="Page Flow Diagram" class="w-full h-auto rounded shadow-sm" />
                     </div>
                 </section>
 
