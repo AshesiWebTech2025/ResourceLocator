@@ -110,26 +110,22 @@ if (!isset($_SESSION['user_id'])) {
                         <div class="border-l-4 border-ashesi-maroon pl-6 py-3 bg-gray-50 rounded-r-lg">
                             <p class="text-gray-700 mb-2">This is the entry point to the application, where the Login form is displayed first. Users who are already currently registered can simply enter their credentials and gain access to the application.</p>
                             <p class="text-gray-700 mb-2">Users who have not been registered can click the link at the bottom of the form. This sends them to the Sign Up form, where the necessary details are entered and then submitted. Upon a successful submission, the user is redirected back to the Login page, where they can now enter their credentials and gain access to the application.</p>
-                        </div>
 
-                        <div class="border-l-4 border-ashesi-maroon pl-6 py-3 bg-gray-50 rounded-r-lg">
                             <p class="text-gray-700 mb-2">Now, user identification and authentication is done, and based on the role of the user, different pages are shown. During registeration, once you select 'Student', 'Viewer','Faculty', or 'Staff', you are directed to the landing page of the application (<code class="text-sm bg-gray-200 px-2 py-1 rounded">login_signup.php</code>). This page (and all pages) includes a sidebar that allows you to access other pages.</p>
-                            <p class="text-gray-700 mb-2">The pages available to these users include</p>
-                            <ul>
+                            <p class="text-gray-700 mb-2">The pages available to these users include:</p>
+                            <ul class="list-disc list-inside text-gray-700 ml-4 space-y-1">
                                 <li>Home</li>
                                 <li>Campus Map</li>
                                 <li>My Bookings</li>
                                 <li>About</li>
                             </ul>
                             <p class="text-gray-700 mb-2">On the other hand, if you are identfied as an 'Admin', upon authentication, you are sent to the Resource Allocator Page.</p>
-                            <p class="text-gray-700 mb-2">The pages available to these users include</p>
-                            <ul>
+                            <p class="text-gray-700 mb-2">The pages available to this user includes:</p>
+                            <ul class="list-disc list-inside text-gray-700 ml-4 space-y-1">
                                 <li>Resource Allocator</li>
                                 <li>Available Sessions</li>
                                 <li>About</li>
                             </ul>
-                        </div>
-                        <div class="border-l-4 border-ashesi-maroon pl-6 py-3 bg-gray-50 rounded-r-lg">
                             <p class="text-gray-700 mb-2">From here on, users can utilise the sidebar to navigate to any page of their choosing.</p>
                         </div>
                     </div>
