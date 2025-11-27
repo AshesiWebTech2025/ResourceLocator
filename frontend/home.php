@@ -102,25 +102,25 @@
                 <section>
                     <h3 class="text-2xl font-semibold text-gray-800 mb-6">What You Can Do Here</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                            <div class="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-ashesi-light text-ashesi-maroon">
+                        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:border-ashesi-maroon cursor-pointer">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-ashesi-light text-ashesi-maroon transition-all duration-300 group-hover:scale-110">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                             </div>
-                            <h4 class="text-xl font-bold text-gray-800 mb-2">Find Resources</h4>
+                            <h4 class="text-xl font-bold text-gray-800 mb-2 transition-colors duration-300 hover:text-ashesi-maroon">Find Resources</h4>
                             <p class="text-gray-600">Easily search for academic advisors, counselors, health services, and study spaces available on campus.</p>
                         </div>
-                        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                            <div class="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-ashesi-light text-ashesi-maroon">
+                        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:border-ashesi-maroon cursor-pointer">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-ashesi-light text-ashesi-maroon transition-all duration-300 group-hover:scale-110">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                             </div>
-                            <h4 class="text-xl font-bold text-gray-800 mb-2">Book Appointments</h4>
+                            <h4 class="text-xl font-bold text-gray-800 mb-2 transition-colors duration-300 hover:text-ashesi-maroon">Book Appointments</h4>
                             <p class="text-gray-600">Check real-time availability and schedule meetings with faculty or support staff directly through the portal.</p>
                         </div>
-                        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                            <div class="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-ashesi-light text-ashesi-maroon">
+                        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:border-ashesi-maroon cursor-pointer">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-ashesi-light text-ashesi-maroon transition-all duration-300 group-hover:scale-110">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                             </div>
-                            <h4 class="text-xl font-bold text-gray-800 mb-2">Navigate Campus</h4>
+                            <h4 class="text-xl font-bold text-gray-800 mb-2 transition-colors duration-300 hover:text-ashesi-maroon">Navigate Campus</h4>
                             <p class="text-gray-600">Use the interactive campus map to find the exact location of any resource, office, or classroom.</p>
                         </div>
                     </div>
@@ -140,27 +140,40 @@
                         <h3 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Find a Resource</h3>
                         <!-- Search Input -->
                         <div class="mb-4">
-                            <input type="text" placeholder="Search by name, type, or capacity..."
+                            <input type="text" id="resource-search" placeholder="Search by name, type, or capacity..."
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-ashesi-maroon focus:border-ashesi-maroon transition duration-150">
                         </div>                        
                         <!-- Scrollable resource list -->
-                        <div class="flex-1 overflow-y-auto space-y-3 pr-2">
-                            <!-- Dummy resources -->
-                            <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-ashesi-light transition duration-150">
-                                <p class="font-semibold text-gray-800">KRB 101</p>
-                                <p class="text-sm text-gray-500">Classroom | Capacity: 40</p>
-                            </div>                            
-                            <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-ashesi-light transition duration-150">
-                                <p class="font-semibold text-gray-800">Conference Hall A</p>
-                                <p class="text-sm text-gray-500">Conference Hall | Capacity: 200</p>
-                            </div>
-                            <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-ashesi-light transition duration-150">
-                                <p class="font-semibold text-gray-800">Engineering Seminar Room</p>
-                                <p class="text-sm text-gray-500">Seminar Room | Capacity: 15</p>
-                            </div>
-                            <div class="text-sm text-center text-gray-400 p-2 mt-4">
-                                (More resources will load here)
-                            </div>
+                        <div id="resource-list" class="flex-1 overflow-y-auto space-y-3 pr-2">
+                            <?php if (!empty($resources)): ?>
+                                <?php 
+                                $currentCategory = '';
+                                foreach ($resources as $resource): 
+                                    // Show category header when it changes
+                                    if ($currentCategory !== $resource['type_name']):
+                                        if ($currentCategory !== '') echo '<div class="pt-2"></div>';
+                                        $currentCategory = $resource['type_name'];
+                                ?>
+                                        <div class="text-xs font-bold text-ashesi-maroon uppercase tracking-wide pt-2 pb-1">
+                                            <?php echo htmlspecialchars($resource['type_name']); ?>s
+                                        </div>
+                                <?php endif; ?>
+                                
+                                <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-ashesi-light hover:border-ashesi-maroon transition duration-150 resource-item" 
+                                     data-resource-id="<?php echo $resource['resource_id']; ?>"
+                                     data-name="<?php echo htmlspecialchars($resource['name']); ?>"
+                                     data-type="<?php echo htmlspecialchars($resource['type_name']); ?>"
+                                     data-capacity="<?php echo $resource['capacity']; ?>">
+                                    <p class="font-semibold text-gray-800"><?php echo htmlspecialchars($resource['name']); ?></p>
+                                    <p class="text-sm text-gray-500"><?php echo htmlspecialchars($resource['type_name']); ?> | Capacity: <?php echo $resource['capacity']; ?></p>
+                                    <p class="text-xs text-gray-400 mt-1"><?php echo htmlspecialchars($resource['description']); ?></p>
+                                </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class="text-sm text-center text-gray-400 p-4">
+                                    No resources available at the moment.
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -343,6 +356,49 @@
                 navMap.addEventListener('click', function(e) {
                     e.preventDefault();
                     showMapView();
+                });
+            }
+            
+            // Search functionality for resources
+            const searchInput = document.getElementById('resource-search');
+            const resourceItems = document.querySelectorAll('.resource-item');
+            
+            if (searchInput && resourceItems.length > 0) {
+                searchInput.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase().trim();
+                    
+                    resourceItems.forEach(item => {
+                        const name = item.dataset.name.toLowerCase();
+                        const type = item.dataset.type.toLowerCase();
+                        const capacity = item.dataset.capacity;
+                        
+                        const matches = name.includes(searchTerm) || 
+                                      type.includes(searchTerm) || 
+                                      capacity.includes(searchTerm);
+                        
+                        if (matches || searchTerm === '') {
+                            item.style.display = '';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                    
+                    // Hide/show category headers based on visible items
+                    const categoryHeaders = document.querySelectorAll('#resource-list .text-xs.font-bold');
+                    categoryHeaders.forEach(header => {
+                        let nextElement = header.nextElementSibling;
+                        let hasVisibleItems = false;
+                        
+                        while (nextElement && !nextElement.classList.contains('font-bold')) {
+                            if (nextElement.classList.contains('resource-item') && nextElement.style.display !== 'none') {
+                                hasVisibleItems = true;
+                                break;
+                            }
+                            nextElement = nextElement.nextElementSibling;
+                        }
+                        
+                        header.style.display = hasVisibleItems ? '' : 'none';
+                    });
                 });
             }
         });

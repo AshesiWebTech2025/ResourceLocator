@@ -1,29 +1,42 @@
 <?php
 header('Content-Type: application/json');
 
-//start session to get user ID
+// Start session to get user ID
 session_start();
-$userId = $_SESSION['user_id'] ?? ($_GET['user_id'] ?? 'test_user_123'); 
+$userId = $_SESSION['user_id'] ?? ($_GET['user_id'] ?? 1); 
 
 if (empty($userId)) {
     echo json_encode(['success' => false, 'message' => 'User not authenticated.']);
     exit;
 }
 
-//load the database connector
-$connector = require_once 'dbConnector.php';
-$db = $connector->getDb();
+// Load the database connector
+require_once 'dbConnector.php';
+$db = connectDB();
+
+if (!$db) {
+    echo json_encode(['success' => false, 'message' => 'Database connection failed.']);
+    exit;
+}
 
 $bookings = [];
 
 try {
+    // Query the correct table with proper column names and join with Resources
     $stmt = $db->prepare("
-        SELECT id, resource_name, start_time, end_time, status 
-        FROM bookings 
-        WHERE user_id = :user_id 
-        ORDER BY start_time DESC
+        SELECT 
+            b.booking_id as id,
+            b.start_time, 
+            b.end_time, 
+            b.status,
+            b.purpose,
+            r.name AS resource_name
+        FROM Bookings b
+        JOIN Resources r ON b.resource_id = r.resource_id
+        WHERE b.user_id = :user_id 
+        ORDER BY b.start_time DESC
     ");
-    $stmt->bindValue(':user_id', $userId, SQLITE3_TEXT);
+    $stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
     
     $result = $stmt->execute();
 
@@ -36,6 +49,6 @@ try {
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => 'Database Error: ' . $e->getMessage()]);
 } finally {
-    $connector->close();
+    $db->close();
 }
 ?>
