@@ -1,24 +1,20 @@
 <?php 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 require_once 'dbConnector.php';
-
+session_start();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(400);
     die("Invalid request method.");
 }
 
-$name = trim($_POST['name'] ?? '');
+$name = htmlspecialchars(trim($_POST['name'] ?? ''));
 $type = trim($_POST['type'] ?? '');
 $capacity = intval($_POST['capacity'] ?? 0);
-$description = trim($_POST['description'] ?? '');
+$description = htmlspecialchars(trim($_POST['description'] ?? ''));
 $latitude = isset($_POST['latitude']) ? round(floatval($_POST['latitude']), 5) : null;
 $longitude = isset($_POST['longitude']) ? round(floatval($_POST['longitude']), 5) : null;
 
-if (!$name || !$type || !$description || !$latitude || !$longitude === null) {
+if (!$name ===""|| !$type==="" || !$description==="" || !$latitude ===null|| !$longitude === null) {
     http_response_code(400);
     die("All fields including map location are required.");
 }
@@ -73,3 +69,4 @@ try {
     die("Exception: " . $e->getMessage());
 }
 ?>
+
