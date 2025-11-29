@@ -1,4 +1,6 @@
 <?php
+    session_start();
+    
     // --- START OF PHP ERROR DEBUGGING ---
     ini_set('display_errors', 1);
     ini_set('display_startup_errors', 1);
@@ -40,9 +42,11 @@
         // Join Bookings with Resources to get the resource name
         $stmt = $db->prepare("
             SELECT 
+                b.booking_id,
                 b.start_time, 
                 b.end_time, 
-                b.status, 
+                b.status,
+                b.purpose,
                 r.name AS resource_name 
             FROM Bookings b
             JOIN Resources r ON b.resource_id = r.resource_id
@@ -140,6 +144,18 @@
     </header>
 
     <main class="p-6 md:p-10 flex-1">
+      <?php if (isset($_SESSION['booking_success'])): ?>
+        <div class="bg-green-50 border border-green-200 text-green-700 px-6 py-4 rounded-lg mb-6">
+          <strong>Success!</strong> <?php echo htmlspecialchars($_SESSION['booking_success']); unset($_SESSION['booking_success']); ?>
+        </div>
+      <?php endif; ?>
+      
+      <?php if (isset($_SESSION['booking_error'])): ?>
+        <div class="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg mb-6">
+          <strong>Error!</strong> <?php echo htmlspecialchars($_SESSION['booking_error']); unset($_SESSION['booking_error']); ?>
+        </div>
+      <?php endif; ?>
+      
       <section class="bg-white p-8 rounded-xl shadow-lg mb-6 border border-gray-100">
         <h2 class="text-2xl font-bold text-gray-900 mb-2">Upcoming & Past Bookings</h2>
         <p class="text-gray-600">Manage your resource reservations. Click a booking to view details or cancel.</p>
@@ -171,8 +187,21 @@
                     <?php
                         $startTime = new DateTime($booking['start_time']);
                         $endTime = new DateTime($booking['end_time']);
+                        $now = new DateTime();
+                        $isPast = $endTime < $now;
+                        $isCancellable = $booking['status'] === 'Confirmed' && $startTime > $now;
+                        
+                        // Prepare booking data as JSON for JavaScript
+                        $bookingJson = json_encode([
+                            'booking_id' => $booking['booking_id'] ?? 0,
+                            'resource_name' => $booking['resource_name'],
+                            'start_time' => $booking['start_time'],
+                            'end_time' => $booking['end_time'],
+                            'status' => $booking['status'],
+                            'purpose' => $booking['purpose'] ?? 'N/A'
+                        ]);
                     ?>
-                    <div class="booking-card bg-white p-6 rounded-xl shadow border border-gray-100 flex items-start justify-between">
+                    <div class="booking-card bg-white p-6 rounded-xl shadow border border-gray-100 flex items-start justify-between" data-booking-id="<?php echo $booking['booking_id'] ?? 0; ?>">
                       <div>
                         <h3 class="text-lg font-semibold text-gray-800"><?php echo htmlspecialchars($booking['resource_name']); ?></h3>
                         <p class="text-sm text-gray-600 mt-1">
@@ -192,8 +221,14 @@
                         </p>
                       </div>
                       <div class="flex flex-col items-end gap-2">
-                        <button class="text-ashesi-maroon border border-ashesi-maroon rounded-full px-3 py-1 text-sm hover:bg-ashesi-maroon hover:text-white transition">View</button>
-                        <button class="text-red-600 border border-red-200 rounded-full px-3 py-1 text-sm hover:bg-red-50 transition">Cancel</button>
+                        <button onclick='viewBookingDetails(<?php echo $bookingJson; ?>)' class="text-ashesi-maroon border border-ashesi-maroon rounded-full px-3 py-1 text-sm hover:bg-ashesi-maroon hover:text-white transition">View</button>
+                        <?php if ($isCancellable): ?>
+                            <button onclick="confirmCancelBooking(<?php echo $booking['booking_id'] ?? 0; ?>)" class="text-red-600 border border-red-200 rounded-full px-3 py-1 text-sm hover:bg-red-50 transition">Cancel</button>
+                        <?php else: ?>
+                            <button disabled class="text-gray-400 border border-gray-200 rounded-full px-3 py-1 text-sm cursor-not-allowed">
+                                <?php echo ($booking['status'] === 'Cancelled') ? 'Cancelled' : 'Past'; ?>
+                            </button>
+                        <?php endif; ?>
                       </div>
                     </div>
                 <?php endforeach; ?>
@@ -324,6 +359,96 @@
       </div>
   </div>
 
+  <!-- View Booking Details Modal -->
+  <div id="viewBookingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl shadow-2xl max-w-md w-full">
+          <div class="bg-ashesi-maroon text-white p-6 rounded-t-xl">
+              <div class="flex justify-between items-center">
+                  <h3 class="text-2xl font-bold">Booking Details</h3>
+                  <button onclick="closeViewModal()" class="text-white hover:text-gray-200 transition">
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                  </button>
+              </div>
+          </div>
+          
+          <div class="p-6 space-y-4">
+              <div class="border-b border-gray-200 pb-3">
+                  <p class="text-sm text-gray-500">Resource</p>
+                  <p id="view-resource-name" class="text-lg font-semibold text-gray-900">-</p>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-4">
+                  <div>
+                      <p class="text-sm text-gray-500">Date</p>
+                      <p id="view-date" class="font-medium text-gray-900">-</p>
+                  </div>
+                  <div>
+                      <p class="text-sm text-gray-500">Status</p>
+                      <p id="view-status" class="font-medium">-</p>
+                  </div>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-4">
+                  <div>
+                      <p class="text-sm text-gray-500">Start Time</p>
+                      <p id="view-start-time" class="font-medium text-gray-900">-</p>
+                  </div>
+                  <div>
+                      <p class="text-sm text-gray-500">End Time</p>
+                      <p id="view-end-time" class="font-medium text-gray-900">-</p>
+                  </div>
+              </div>
+              
+              <div class="border-t border-gray-200 pt-3">
+                  <p class="text-sm text-gray-500 mb-1">Purpose</p>
+                  <p id="view-purpose" class="text-gray-900">-</p>
+              </div>
+              
+              <div class="flex gap-3 pt-4">
+                  <button onclick="closeViewModal()"
+                          class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium">
+                      Close
+                  </button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Cancel Booking Confirmation Modal -->
+  <div id="cancelBookingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl shadow-2xl max-w-md w-full">
+          <div class="p-6">
+              <div class="flex items-center gap-4 mb-4">
+                  <div class="bg-red-100 rounded-full p-3">
+                      <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                      </svg>
+                  </div>
+                  <div>
+                      <h3 class="text-xl font-bold text-gray-900">Cancel Booking?</h3>
+                      <p class="text-sm text-gray-600">This action cannot be undone.</p>
+                  </div>
+              </div>
+              
+              <p class="text-gray-700 mb-6">Are you sure you want to cancel this booking? You will lose your reservation.</p>
+              
+              <form action="../backend/cancel_booking.php" method="POST" class="flex gap-3">
+                  <input type="hidden" name="booking_id" id="cancel-booking-id" value="">
+                  <button type="button" onclick="closeCancelModal()"
+                          class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">
+                      Keep Booking
+                  </button>
+                  <button type="submit"
+                          class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-semibold">
+                      Yes, Cancel
+                  </button>
+              </form>
+          </div>
+      </div>
+  </div>
+
   <script>
       function openBookingModal() {
           document.getElementById('bookingModal').classList.remove('hidden');
@@ -335,11 +460,66 @@
           document.body.style.overflow = 'auto';
       }
 
-      // Close modal when clicking outside
+      function viewBookingDetails(booking) {
+          const modal = document.getElementById('viewBookingModal');
+          
+          // Parse dates
+          const startDate = new Date(booking.start_time);
+          const endDate = new Date(booking.end_time);
+          
+          // Format dates and times
+          const dateStr = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          const startTimeStr = startDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+          const endTimeStr = endDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+          
+          // Status badge styling
+          let statusClass = 'bg-blue-100 text-blue-800';
+          if (booking.status === 'Confirmed') statusClass = 'bg-green-100 text-green-800';
+          if (booking.status === 'Cancelled') statusClass = 'bg-red-100 text-red-800';
+          if (booking.status === 'Completed') statusClass = 'bg-gray-100 text-gray-800';
+          
+          // Populate modal
+          document.getElementById('view-resource-name').textContent = booking.resource_name;
+          document.getElementById('view-date').textContent = dateStr;
+          document.getElementById('view-start-time').textContent = startTimeStr;
+          document.getElementById('view-end-time').textContent = endTimeStr;
+          document.getElementById('view-purpose').textContent = booking.purpose;
+          
+          const statusEl = document.getElementById('view-status');
+          statusEl.textContent = booking.status;
+          statusEl.className = `inline-block px-2 py-1 rounded-full text-xs font-medium ${statusClass}`;
+          
+          modal.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+      }
+
+      function closeViewModal() {
+          document.getElementById('viewBookingModal').classList.add('hidden');
+          document.body.style.overflow = 'auto';
+      }
+
+      function confirmCancelBooking(bookingId) {
+          document.getElementById('cancel-booking-id').value = bookingId;
+          document.getElementById('cancelBookingModal').classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+      }
+
+      function closeCancelModal() {
+          document.getElementById('cancelBookingModal').classList.add('hidden');
+          document.body.style.overflow = 'auto';
+      }
+
+      // Close modals when clicking outside
       document.getElementById('bookingModal')?.addEventListener('click', function(e) {
-          if (e.target === this) {
-              closeBookingModal();
-          }
+          if (e.target === this) closeBookingModal();
+      });
+
+      document.getElementById('viewBookingModal')?.addEventListener('click', function(e) {
+          if (e.target === this) closeViewModal();
+      });
+
+      document.getElementById('cancelBookingModal')?.addEventListener('click', function(e) {
+          if (e.target === this) closeCancelModal();
       });
   </script>
 
