@@ -159,7 +159,21 @@ function displaySlots(slots) {
     slots.forEach((slot, idx) => {
         const li = document.createElement('li');
         li.className = 'flex items-center justify-between bg-gray-50 p-2 rounded';
-        li.innerHTML = `<div class="text-sm">${capitalize(slot.day_of_week || slot.day)} — ${slot.start_time || slot.start} to ${slot.end_time || slot.end}</div><div class="flex gap-2"><button class="text-sm text-ashesi-maroon remove-slot-btn" data-idx="${idx}">Remove</button></div>`;
+        
+        // Handle multiple format variations
+        const day = slot.day_of_week || slot.day || 'Unknown';
+        let startTime = slot.start_time || slot.start;
+        let endTime = slot.end_time || slot.end;
+        
+        // If we have hour/minute format, convert to time string
+        if (!startTime && slot.start_hour !== undefined) {
+            startTime = `${String(slot.start_hour).padStart(2,'0')}:${String(slot.start_minute).padStart(2,'0')}`;
+        }
+        if (!endTime && slot.end_hour !== undefined) {
+            endTime = `${String(slot.end_hour).padStart(2,'0')}:${String(slot.end_minute).padStart(2,'0')}`;
+        }
+        
+        li.innerHTML = `<div class="text-sm">${capitalize(day)} — ${startTime || '??:??'} to ${endTime || '??:??'}</div><div class="flex gap-2"><button class="text-sm text-ashesi-maroon remove-slot-btn" data-idx="${idx}">Remove</button></div>`;
         li.querySelector('.remove-slot-btn').addEventListener('click', () => { removeSlot(idx); });
         slotList.appendChild(li);
     });
@@ -168,19 +182,52 @@ function displaySlots(slots) {
 function addSlot() {
     if (!currentResourceId) return alert('Select a resource first');
     const day = document.getElementById('daySelect').value;
-    const start = document.getElementById('startTime').value;
-    const end = document.getElementById('endTime').value;
+    
+    // Try to get time from time inputs (type="time") or hour/minute selects
+    let start, end;
+    const startTimeEl = document.getElementById('startTime');
+    const endTimeEl = document.getElementById('endTime');
+    const startHourEl = document.getElementById('startHour');
+    const startMinuteEl = document.getElementById('startMinute');
+    const endHourEl = document.getElementById('endHour');
+    const endMinuteEl = document.getElementById('endMinute');
+    
+    if (startTimeEl && endTimeEl && startTimeEl.value && endTimeEl.value) {
+        start = startTimeEl.value;
+        end = endTimeEl.value;
+    } else if (startHourEl && startMinuteEl && endHourEl && endMinuteEl) {
+        const sh = startHourEl.value.padStart(2, '0');
+        const sm = startMinuteEl.value.padStart(2, '0');
+        const eh = endHourEl.value.padStart(2, '0');
+        const em = endMinuteEl.value.padStart(2, '0');
+        start = `${sh}:${sm}`;
+        end = `${eh}:${em}`;
+    } else {
+        return alert('Please enter start and end times');
+    }
+    
     if (!start || !end) return alert('Please enter start and end times');
     if (start >= end) return alert('End time must be after start time');
 
-    // simple overlap check
-    const overlap = currentSlots.some(s => s.day_of_week === day && ((start >= s.start_time && start < s.end_time) || (end > s.start_time && end <= s.end_time) || (start <= s.start_time && end >= s.end_time)));
+    // simple overlap check - handle both formats
+    const overlap = currentSlots.some(s => {
+        const slotDay = s.day_of_week || s.day;
+        const slotStart = s.start_time || `${String(s.start_hour).padStart(2,'0')}:${String(s.start_minute).padStart(2,'0')}`;
+        const slotEnd = s.end_time || `${String(s.end_hour).padStart(2,'0')}:${String(s.end_minute).padStart(2,'0')}`;
+        return slotDay === day && ((start >= slotStart && start < slotEnd) || (end > slotStart && end <= slotEnd) || (start <= slotStart && end >= slotEnd));
+    });
     if (overlap) return alert('Time slot overlaps with an existing slot');
 
     currentSlots.push({ day_of_week: day, start_time: start, end_time: end });
     // sort
     const order = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-    currentSlots.sort((a, b) => order.indexOf(a.day_of_week) - order.indexOf(b.day_of_week) || a.start_time.localeCompare(b.start_time));
+    currentSlots.sort((a, b) => {
+        const dayA = a.day_of_week || a.day;
+        const dayB = b.day_of_week || b.day;
+        const startA = a.start_time || `${String(a.start_hour).padStart(2,'0')}:${String(a.start_minute).padStart(2,'0')}`;
+        const startB = b.start_time || `${String(b.start_hour).padStart(2,'0')}:${String(b.start_minute).padStart(2,'0')}`;
+        return order.indexOf(dayA) - order.indexOf(dayB) || startA.localeCompare(startB);
+    });
     displaySlots(currentSlots);
 }
 
@@ -194,8 +241,45 @@ async function saveAllSlots() {
     try {
         // BACKEND: POST ../backend/available_sessions.php?action=updateSlots with resource_id & slots
         const backendBase = getBackendBase();
-        const body = new URLSearchParams({ resource_id: currentResourceId, slots: JSON.stringify(currentSlots) });
-        const res = await fetch(`${backendBase}?action=updateSlots`, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+        
+        // Convert slots to the format expected by the backend
+        const formattedSlots = currentSlots.map(slot => {
+            // Parse time strings if they exist
+            let startHour = slot.start_hour;
+            let startMinute = slot.start_minute;
+            let endHour = slot.end_hour;
+            let endMinute = slot.end_minute;
+            
+            if (slot.start_time && typeof slot.start_time === 'string') {
+                const parts = slot.start_time.split(':');
+                startHour = parseInt(parts[0], 10);
+                startMinute = parseInt(parts[1], 10);
+            }
+            if (slot.end_time && typeof slot.end_time === 'string') {
+                const parts = slot.end_time.split(':');
+                endHour = parseInt(parts[0], 10);
+                endMinute = parseInt(parts[1], 10);
+            }
+            
+            return {
+                day: slot.day_of_week || slot.day,
+                start_hour: startHour,
+                start_minute: startMinute,
+                end_hour: endHour,
+                end_minute: endMinute
+            };
+        });
+        
+        const payload = {
+            resource_id: currentResourceId,
+            slots: formattedSlots
+        };
+        
+        const res = await fetch(`${backendBase}?action=updateSlots`, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify(payload) 
+        });
         const json = await res.json();
         if (json.success) {
             alert('Time slots saved successfully!');
