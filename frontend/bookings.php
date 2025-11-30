@@ -293,13 +293,35 @@ if ($db) {
                     </select>
                 </div>
 
-                <!-- Date Selection -->
-                <div>
-                    <label for="booking_date" class="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                    <input type="date" name="booking_date" id="booking_date" required
-                        min="<?php echo date('Y-m-d'); ?>"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ashesi-maroon focus:border-ashesi-maroon transition">
-                </div>
+              <!-- Date Selection -->
+              <div>
+                  <label for="booking_date" class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                  <input type="date" name="booking_date" id="booking_date" required
+                         min="<?php echo date('Y-m-d'); ?>"
+                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ashesi-maroon focus:border-ashesi-maroon transition">
+              </div>
+
+              <!-- Available Slots Info -->
+              <div id="availability-info" class="hidden">
+                  <div id="availability-loading" class="hidden text-sm text-gray-500 flex items-center gap-2">
+                      <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                      </svg>
+                      Checking availability...
+                  </div>
+                  <div id="availability-slots" class="hidden bg-green-50 border border-green-200 rounded-lg p-3">
+                      <p class="text-sm font-medium text-green-800 mb-2">✓ Available time slots for <span id="slot-day"></span>:</p>
+                      <div id="slots-list" class="flex flex-wrap gap-2"></div>
+                  </div>
+                  <div id="availability-booked" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-2">
+                      <p class="text-sm font-medium text-yellow-800 mb-2">⚠ Already booked times:</p>
+                      <div id="booked-list" class="flex flex-wrap gap-2"></div>
+                  </div>
+                  <div id="availability-none" class="hidden bg-red-50 border border-red-200 rounded-lg p-3">
+                      <p class="text-sm text-red-700">✗ This resource is not available on this day. Please choose a different date.</p>
+                  </div>
+              </div>
 
                 <!-- Time Selection -->
                 <div class="grid grid-cols-2 gap-4">
@@ -508,134 +530,132 @@ if ($db) {
         }
       });
 
-      // Handle window resize
-      let resizeTimer;
-      window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-          initializeSidebar();
-        }, 250); // Debounce resize events
-      });
 
-      // Initialize on load
-      initializeSidebar();
-    });
-  </script>
-
-  <script src="./js/map.js"></script>
-  <!--<script src="./js/main.js"></script>-->
-  <!-- Load the new bookings logic -->
-  <script src="./js/bookings.js"></script>
-  <script>
-    // View switching for bookings.html
-    document.addEventListener('DOMContentLoaded', function () {
-      const toggleBtn = document.getElementById('toggle-btn');
-      const bookingsView = document.getElementById('bookings-view');
-      const mapView = document.getElementById('map-view');
-
-      function showBookingsView() {
-        bookingsView.classList.remove('hidden');
-        mapView.classList.add('hidden');
-        toggleBtn.textContent = 'Toggle Map View';
+      function openBookingModal() {
+          document.getElementById('bookingModal').classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+          // Reset availability display
+          hideAvailabilityInfo();
+      }
+      function closeBookingModal() {
+          document.getElementById('bookingModal').classList.add('hidden');
+          document.body.style.overflow = 'auto';
+          // Reset form
+          document.getElementById('resource_id').value = '';
+          document.getElementById('booking_date').value = '';
+          document.getElementById('start_time').value = '';
+          document.getElementById('end_time').value = '';
+          document.getElementById('purpose').value = '';
+          hideAvailabilityInfo();
       }
 
-      function showMapView() {
-        bookingsView.classList.add('hidden');
-        mapView.classList.remove('hidden');
-        toggleBtn.textContent = 'Toggle Bookings View';
-
-        // Resize map if it exists
-        if (window.mapInstance) {
-          setTimeout(() => {
-            window.mapInstance.resize();
-          }, 100);
-        }
+      // Availability checking functions
+      function hideAvailabilityInfo() {
+          document.getElementById('availability-info').classList.add('hidden');
+          document.getElementById('availability-loading').classList.add('hidden');
+          document.getElementById('availability-slots').classList.add('hidden');
+          document.getElementById('availability-booked').classList.add('hidden');
+          document.getElementById('availability-none').classList.add('hidden');
       }
 
-      if (toggleBtn) {
-        let isMapView = false;
-        toggleBtn.addEventListener('click', function (e) {
-          e.preventDefault();
-          if (isMapView) {
-            showBookingsView();
-          } else {
-            showMapView();
+      function checkAvailability() {
+          const resourceId = document.getElementById('resource_id').value;
+          const date = document.getElementById('booking_date').value;
+          
+          if (!resourceId || !date) {
+              hideAvailabilityInfo();
+              return;
           }
-          isMapView = !isMapView;
-        });
+          
+          // Show loading
+          document.getElementById('availability-info').classList.remove('hidden');
+          document.getElementById('availability-loading').classList.remove('hidden');
+          document.getElementById('availability-slots').classList.add('hidden');
+          document.getElementById('availability-booked').classList.add('hidden');
+          document.getElementById('availability-none').classList.add('hidden');
+          
+          fetch(`../backend/check_availability.php?resource_id=${resourceId}&date=${date}`)
+              .then(response => response.json())
+              .then(data => {
+                  document.getElementById('availability-loading').classList.add('hidden');
+                  
+                  if (data.success && data.data) {
+                      if (!data.data.day_available) {
+                          // No availability on this day
+                          document.getElementById('availability-none').classList.remove('hidden');
+                      } else {
+                          // Show available slots
+                          document.getElementById('slot-day').textContent = data.data.day_of_week;
+                          
+                          const slotsContainer = document.getElementById('slots-list');
+                          slotsContainer.innerHTML = '';
+                          
+                          if (data.data.available_slots && data.data.available_slots.length > 0) {
+                              data.data.available_slots.forEach(slot => {
+                                  const badge = document.createElement('span');
+                                  badge.className = 'bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-medium';
+                                  badge.textContent = `${slot.start} - ${slot.end}`;
+                                  slotsContainer.appendChild(badge);
+                              });
+                              document.getElementById('availability-slots').classList.remove('hidden');
+                          }
+                          
+                          // Show booked slots if any
+                          if (data.data.booked_slots && data.data.booked_slots.length > 0) {
+                              const bookedContainer = document.getElementById('booked-list');
+                              bookedContainer.innerHTML = '';
+                              data.data.booked_slots.forEach(slot => {
+                                  const badge = document.createElement('span');
+                                  badge.className = 'bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-sm font-medium';
+                                  badge.textContent = `${slot.start} - ${slot.end}`;
+                                  bookedContainer.appendChild(badge);
+                              });
+                              document.getElementById('availability-booked').classList.remove('hidden');
+                          }
+                      }
+                  } else {
+                      console.error('Failed to check availability:', data.message);
+                  }
+              })
+              .catch(error => {
+                  console.error('Error checking availability:', error);
+                  document.getElementById('availability-loading').classList.add('hidden');
+              });
       }
-
-      // Initialize the correct view on page load
-      showBookingsView();
-
-      // Mirror the modal open functionality for all three buttons
-      const openModalBtn = document.getElementById('open-booking-modal');
-      const openModalBtn2 = document.getElementById('open-booking-modal-2');
-      const openModalBtn3 = document.getElementById('open-booking-modal-3');
-      const modal = document.getElementById('booking-modal');
-
-      const openModal = () => modal.classList.remove('hidden');
-
-      if (openModalBtn) openModalBtn.addEventListener('click', openModal);
-      if (openModalBtn2) openModalBtn2.addEventListener('click', openModal);
-      if (openModalBtn3) openModalBtn3.addEventListener('click', openModal);
-    });
-  </script>
-
-    <script>
-        function openBookingModal() {
-            document.getElementById('bookingModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeBookingModal() {
-            document.getElementById('bookingModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
-
-        function viewBookingDetails(booking) {
-            const modal = document.getElementById('viewBookingModal');
-            // Parse dates
-            const startDate = new Date(booking.start_time);
-            const endDate = new Date(booking.end_time);
-            // Format dates and times
-            const dateStr = startDate.toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-            });
-            const startTimeStr = startDate.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-            });
-            const endTimeStr = endDate.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-            });
-            // Status badge styling
-            let statusClass = 'bg-blue-100 text-blue-800';
-            if (booking.status === 'Confirmed') statusClass = 'bg-green-100 text-green-800';
-            if (booking.status === 'Cancelled') statusClass = 'bg-red-100 text-red-800';
-            if (booking.status === 'Completed') statusClass = 'bg-gray-100 text-gray-800';
-            // Populate modal
-            document.getElementById('view-resource-name').textContent = booking.resource_name;
-            document.getElementById('view-date').textContent = dateStr;
-            document.getElementById('view-start-time').textContent = startTimeStr;
-            document.getElementById('view-end-time').textContent = endTimeStr;
-            document.getElementById('view-purpose').textContent = booking.purpose;
-            const statusEl = document.getElementById('view-status');
-            statusEl.textContent = booking.status;
-            statusEl.className = `inline-block px-2 py-1 rounded-full text-xs font-medium ${statusClass}`;
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeViewModal() {
-            document.getElementById('viewBookingModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
+      
+      // Add event listeners for resource and date changes
+      document.getElementById('resource_id').addEventListener('change', checkAvailability);
+      document.getElementById('booking_date').addEventListener('change', checkAvailability);
+      function viewBookingDetails(booking) {
+          const modal = document.getElementById('viewBookingModal');
+          // Parse dates
+          const startDate = new Date(booking.start_time);
+          const endDate = new Date(booking.end_time);
+          // Format dates and times
+          const dateStr = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          const startTimeStr = startDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+          const endTimeStr = endDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+          // Status badge styling
+          let statusClass = 'bg-blue-100 text-blue-800';
+          if (booking.status === 'Confirmed') statusClass = 'bg-green-100 text-green-800';
+          if (booking.status === 'Cancelled') statusClass = 'bg-red-100 text-red-800';
+          if (booking.status === 'Completed') statusClass = 'bg-gray-100 text-gray-800';
+          // Populate modal
+          document.getElementById('view-resource-name').textContent = booking.resource_name;
+          document.getElementById('view-date').textContent = dateStr;
+          document.getElementById('view-start-time').textContent = startTimeStr;
+          document.getElementById('view-end-time').textContent = endTimeStr;
+          document.getElementById('view-purpose').textContent = booking.purpose;
+          const statusEl = document.getElementById('view-status');
+          statusEl.textContent = booking.status;
+          statusEl.className = `inline-block px-2 py-1 rounded-full text-xs font-medium ${statusClass}`;
+          modal.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+      }
+      function closeViewModal() {
+          document.getElementById('viewBookingModal').classList.add('hidden');
+          document.body.style.overflow = 'auto';
+      }
 
         function confirmCancelBooking(bookingId) {
             document.getElementById('cancel-booking-id').value = bookingId;

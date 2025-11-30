@@ -1,5 +1,18 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 session_start();
+require_once('../backend/dbConnector.php'); 
+if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
+    $_SESSION['message'] = "Please log in to access this page.";
+    $_SESSION['message_type'] = "error";
+    header('Location: login_signup.php'); 
+    exit();
+}
+$user_role = $_SESSION['role'] ?? 'Admin';
+$user_first_name = $_SESSION["first_name"];
+$user_last_name = $_SESSION["last_name"];
 ?>
 
 <!DOCTYPE html>
@@ -47,9 +60,9 @@ session_start();
                 </svg>
                 Resource Allocator
             </a>
-            <a href="available_sessions.html"
+            <a href="available_sessions.php"
                 class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">
-                <svg class="w-5 h-5m r-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"></path>
@@ -106,7 +119,7 @@ session_start();
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                 </svg>
-                <span class="text-sm md:text-base">Admin Portal</span>
+                <span class="text-sm md:text-base hidden sm:inline">Admin Portal</span>
             </div>
 
             <!-- Mobile Menu Button (Hidden on Desktop) 
@@ -368,8 +381,188 @@ session_start();
     <!-- load main js -->
     <script src="js/resourceAllocator.js"></script>
     <!--<script defer src="js/main.js"></script>-->
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function( ){
+            const dayOrder = {'monday':1,'tuesday':2,'wednesday':3,'thursday':4,'friday':5,'saturday':6,'sunday':7};
+            let hotspots = <?php echo json_encode($initialHotspots); ?>;
+            let currentResource = null;
+            let resourceSlots = {};
+
+            function showMessage(message, type = 'error') {…}
+
+            function hideMessage() {…}
+
+            function formatTime(hour, minute) {…}
+
+            function sortSlots(slots) {…}
+
+            function renderSlots() {…}
+
+            function openModal(resource) {
+
+            function closeModal() {…}
+
+            function renderResourceList() {…}
+
+            // new helpers to normalize time/day for server
+            function toTitleCaseDay(dayRaw) {
+                if (!dayRaw) return '';
+                return dayRaw.trim().toLowerCase().replace(/^\w/, c => c.toUpperCase());
+            }
+
+            function normalizeTimeParts(hour, minute) {
+                // ensure numeric and within ranges; returns HH:MM:SS
+                let h = parseInt(hour, 10);
+                let m = parseInt(minute, 10);
+                if (isNaN(h) || isNaN(m)) return null;
+                if (h < 0 || h > 23 || m < 0 || m > 59) return null;
+                return ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2) + ':00';
+            }
+
+            // addSlot should already push to resourceSlots; only update validation when saving
+            document.getElementById('addSlot').addEventListener('click', function() {
+                renderSlots();
+            });
+
+            // saveTimes now validates and normalizes data before sending to server
+            document.getElementById('saveTimes').addEventListener('click', function() {
+                if (!currentResource) {
+                    showMessage('No resource selected', 'error');
+                    return;
+                }
+
+                // collect slots from UI (assumes resourceSlots[currentResource.resource_id] exists)
+                const slots = resourceSlots[currentResource.resource_id] || [];
+                if (!slots.length) {
+                    showMessage('No slots to save', 'error');
+                    return;
+                }
+
+                // Validate and normalize
+                const payloadSlots = [];
+                const validDays = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+                for (let i = 0; i < slots.length; i++) {
+                    const s = slots[i];
+
+                    // Accept either start/end string, or parts as numbers
+                    let start = null, end = null, day = null;
+                    if (s.start && s.end) {
+                        // attempt to normalize if format is HH:MM or HH:MM:SS
+                        // normalize / pad to seconds
+                        const partsStart = s.start.split(':');
+                        const partsEnd = s.end.split(':');
+                        if (partsStart.length >= 2 && partsEnd.length >= 2) {
+                            let sh = parseInt(partsStart[0], 10), sm = parseInt(partsStart[1], 10);
+                            let eh = parseInt(partsEnd[0], 10), em = parseInt(partsEnd[1], 10);
+                            let startNorm = normalizeTimeParts(sh, sm);
+                            let endNorm = normalizeTimeParts(eh, em);
+                            if (!startNorm || !endNorm) {
+                                showMessage('Invalid time provided for a slot', 'error');
+                                return;
+                            }
+                            start = startNorm; end = endNorm;
+                        } else {
+                            showMessage('Invalid time format. Use HH:MM or HH:MM:SS', 'error');
+                            return;
+                        }
+                    } else if ('start_hour' in s && 'start_minute' in s && 'end_hour' in s && 'end_minute' in s) {
+                        start = normalizeTimeParts(s.start_hour, s.start_minute);
+                        end = normalizeTimeParts(s.end_hour, s.end_minute);
+                        if (!start || !end) { showMessage('Invalid hour/minute for a slot', 'error'); return; }
+                    } else {
+                        showMessage('Slot missing time fields', 'error');
+                        return;
+                    }
+
+                    if (!s.day) { showMessage('Slot missing day', 'error'); return; }
+                    day = toTitleCaseDay(s.day); // "Monday" etc.
+                    if (!validDays.includes(day)) { showMessage('Invalid day: ' + s.day, 'error'); return; }
+
+                    // ensure start < end
+                    const startSecs = (parseInt(start.substring(0,2),10) * 3600) + (parseInt(start.substring(3,5),10) * 60);
+                    const endSecs = (parseInt(end.substring(0,2),10) * 3600) + (parseInt(end.substring(3,5),10) * 60);
+                    if (startSecs >= endSecs) { showMessage('Start time must be before end time', 'error'); return; }
+
+                    payloadSlots.push({ day: day, start: start, end: end });
+                }
+
+                // Build payload
+                const payload = {
+                    resource_id: currentResource.resource_id,
+                    slots: payloadSlots
+                };
+
+                // POST to updateSlots
+                fetch('available_sessions.php?action=updateSlots', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                .then(r => r.json())
+                .then(resp => {
+                    if (resp.success) {
+                        showMessage('Availability saved', 'success');
+                        // refresh UI
+                        loadAvailabilityForResource(currentResource.resource_id);
+                        closeModal();
+                    } else {
+                        showMessage(resp.message || 'Failed to save availability', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    showMessage('Failed to save availability: ' + err.message, 'error');
+                });
+            });
+            });
+
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            document.getElementById('cancelTimes').addEventListener('click', closeModal);
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeModal();
+            });
+
+            renderResourceList();
+        });
+    </script>
 
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          const hamburgerBtn = document.getElementById('hamburgerBtn');
+          const sidebar = document.getElementById('sidebar');
+
+          if (hamburgerBtn && sidebar) {
+              hamburgerBtn.addEventListener('click', () => {
+                  const isExpanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+                  
+                  // Toggle sidebar visibility class
+                  sidebar.classList.toggle('-translate-x-full');
+                  
+                  // Toggle button state and body overflow for mobile
+                  hamburgerBtn.setAttribute('aria-expanded', !isExpanded);
+
+                  if (!isExpanded) {
+                      // Lock body scrolling when sidebar is open
+                      document.body.classList.add('mobile-nav-open');
+                  } else {
+                      // Re-enable body scrolling
+                      document.body.classList.remove('mobile-nav-open');
+                  }
+              });
+              sidebar.querySelectorAll('a').forEach(link => {
+                  link.addEventListener('click', () => {
+                      if (window.innerWidth < 768) {
+                          sidebar.classList.add('-translate-x-full');
+                          hamburgerBtn.setAttribute('aria-expanded', 'false');
+                          document.body.classList.remove('mobile-nav-open');
+                      }
+                  });
+              });
+          }
+      });
+    </script>
 
 </body>
 

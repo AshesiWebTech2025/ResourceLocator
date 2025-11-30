@@ -295,6 +295,338 @@ function cancelBooking(SQLite3 $db, $bookingId, $userId){
     }
     return false;
 }
+
+//code for setting resource availabilty below
+/**
+ * Fetches all resources marked as bookable (is_bookable = 1).
+ *
+ * @param SQLite3 $db The database connection object.
+ * @return array List of bookable resources.
+ */
+function getBookableResources(SQLite3 $db) {
+    $resources = [];
+    $query = "SELECT r.*, rt.type_name 
+              FROM Resources r 
+              JOIN Resource_Types rt ON r.type_id = rt.type_id
+              WHERE r.is_bookable = 1
+              ORDER BY r.name";
+    $results = $db->query($query);
+    if ($results) {
+        while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+            //convert to a manner easy for js consumption later
+            $resources[] = [
+                'resource_id' => $row['resource_id'],
+                'name' => $row['name'],
+                'capacity' => $row['capacity'],
+                'description' => $row['description'],
+                'type_name' => $row['type_name'],
+                'latitude' => $row['latitude'],
+                'longitude' => $row['longitude']
+            ];
+        }
+    }
+    return $resources;
+}
+/**
+ * Retrieves the resource_availability slots for a specific resource.
+ *
+ * @param SQLite3 $db The database connection object.
+ * @param int $resourceId The ID of the resource.
+ * @return array List of availability slots.
+ */
+function getResourceAvailability(SQLite3 $db, $resourceId) {
+    $slots = [];
+    $query = "SELECT 
+                availability_id, 
+                day_of_week, 
+                start_time, 
+                end_time 
+              FROM resource_availability 
+              WHERE resource_id = :resourceId 
+              ORDER BY day_of_week, start_time";
+    $stmt = $db->prepare($query);
+    if ($stmt) {
+        $stmt->bindValue(':resourceId', $resourceId, SQLITE3_INTEGER);
+        $results = $stmt->execute();
+        
+        if ($results) {
+            while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+                $slots[] = $row;
+            }
+        }
+        $stmt->close();
+    } else {
+        error_log("Failed to prepare getResourceAvailability query: " . $db->lastErrorMsg());
+    }
+    return $slots;
+}
+/**
+ * Sets the resource_availability slots for a specific resource by deleting 
+ * existing records and inserting the new batch.
+ *
+ * @param SQLite3 $db The database connection object.
+ * @param int $resourceId The ID of the resource.
+ * @param array $slots Array of slot objects (must contain 'day', 'start', 'end').
+ * @return bool True on successful update, false otherwise.
+ */
+function setResourceAvailability(SQLite3 $db, $resourceId, $slots) {
+    // Start transaction for atomic operation
+    $db->exec('BEGIN TRANSACTION');
+    try {
+        // Delete all existing slots for resource
+        $deleteQuery = "DELETE FROM resource_availability WHERE resource_id = :resourceId";
+        $deleteStmt = $db->prepare($deleteQuery);
+        $deleteStmt->bindValue(':resourceId', $resourceId, SQLITE3_INTEGER);
+        $deleteStmt->execute();
+        $deleteStmt->close();
+        
+        // Insert new slots
+        if (!empty($slots)) {
+            $insertQuery = "INSERT INTO resource_availability (resource_id, day_of_week, start_time, end_time) 
+                            VALUES (:resourceId, :day, :start, :end)";
+            $insertStmt = $db->prepare($insertQuery);
+
+            foreach ($slots as $slot) {
+                // Use the time strings exactly as received - they're TEXT fields
+                $insertStmt->bindValue(':resourceId', $resourceId, SQLITE3_INTEGER);
+                $insertStmt->bindValue(':day', $slot['day'], SQLITE3_TEXT);
+                $insertStmt->bindValue(':start', $slot['start'], SQLITE3_TEXT);
+                $insertStmt->bindValue(':end', $slot['end'], SQLITE3_TEXT);
+                
+                $result = $insertStmt->execute();
+                if (!$result) {
+                    error_log("Failed to insert slot: " . $db->lastErrorMsg());
+                    throw new Exception("Database insert failed: " . $db->lastErrorMsg());
+                }
+                $insertStmt->reset();  // Reset statement for reuse with new bindings
+            }
+            $insertStmt->close();
+        }
+        
+        // Commit transaction
+        $db->exec('COMMIT');
+        return true;
+    } catch (Exception $e) {
+        // Rollback on error
+        $db->exec('ROLLBACK');
+        error_log("Failed to set resource availability: " . $e->getMessage());
+        return false;
+    }
+}
+//cpde for setting resource availabiltty above
+
+/**
+ * Checks if a booking time falls within the allowed availability slots for a resource.
+ * 
+ * @param SQLite3 $db The database connection object.
+ * @param int $resourceId The ID of the resource being booked.
+ * @param string $bookingDate The date of the booking (YYYY-MM-DD format).
+ * @param string $startTime The start time of the booking (HH:MM or HH:MM:SS format).
+ * @param string $endTime The end time of the booking (HH:MM or HH:MM:SS format).
+ * @return array ['valid' => bool, 'message' => string, 'available_slots' => array]
+ */
+function isBookingWithinAvailability(SQLite3 $db, $resourceId, $bookingDate, $startTime, $endTime) {
+    // Get the day of week from the booking date
+    $dayOfWeek = strtolower(date('l', strtotime($bookingDate)));
+    
+    // Normalize time to HH:MM format for comparison
+    $bookingStart = date('H:i', strtotime($startTime));
+    $bookingEnd = date('H:i', strtotime($endTime));
+    
+    // Get availability slots for this resource on this day
+    $query = "SELECT start_time, end_time 
+              FROM resource_availability 
+              WHERE resource_id = :resourceId 
+              AND LOWER(day_of_week) = :dayOfWeek
+              ORDER BY start_time";
+    
+    $stmt = $db->prepare($query);
+    if (!$stmt) {
+        return ['valid' => false, 'message' => 'Database error checking availability.', 'available_slots' => []];
+    }
+    
+    $stmt->bindValue(':resourceId', $resourceId, SQLITE3_INTEGER);
+    $stmt->bindValue(':dayOfWeek', $dayOfWeek, SQLITE3_TEXT);
+    
+    $results = $stmt->execute();
+    $availableSlots = [];
+    $isWithinSlot = false;
+    
+    while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+        // Normalize slot times to HH:MM
+        $slotStart = date('H:i', strtotime($row['start_time']));
+        $slotEnd = date('H:i', strtotime($row['end_time']));
+        
+        $availableSlots[] = [
+            'start' => $slotStart,
+            'end' => $slotEnd
+        ];
+        
+        // Check if booking falls completely within this slot
+        if ($bookingStart >= $slotStart && $bookingEnd <= $slotEnd) {
+            $isWithinSlot = true;
+        }
+    }
+    $stmt->close();
+    
+    // If no slots are defined for this day, the resource is not available
+    if (empty($availableSlots)) {
+        $dayName = ucfirst($dayOfWeek);
+        return [
+            'valid' => false, 
+            'message' => "This resource is not available on {$dayName}s. Please choose a different day.",
+            'available_slots' => []
+        ];
+    }
+    
+    if (!$isWithinSlot) {
+        // Build a friendly message showing available slots
+        $slotStrings = array_map(function($slot) {
+            return $slot['start'] . ' - ' . $slot['end'];
+        }, $availableSlots);
+        
+        $dayName = ucfirst($dayOfWeek);
+        return [
+            'valid' => false,
+            'message' => "Your booking time ({$bookingStart} - {$bookingEnd}) is outside the allowed time slots. Available times on {$dayName}s: " . implode(', ', $slotStrings),
+            'available_slots' => $availableSlots
+        ];
+    }
+    
+    return ['valid' => true, 'message' => 'Booking time is valid.', 'available_slots' => $availableSlots];
+}
+
+/**
+ * Checks if a booking conflicts with existing confirmed bookings for the same resource.
+ * 
+ * @param SQLite3 $db The database connection object.
+ * @param int $resourceId The ID of the resource being booked.
+ * @param string $startDateTime The start datetime (YYYY-MM-DD HH:MM:SS format).
+ * @param string $endDateTime The end datetime (YYYY-MM-DD HH:MM:SS format).
+ * @param int|null $excludeBookingId Optional booking ID to exclude (for updates).
+ * @return array ['has_conflict' => bool, 'message' => string, 'conflicting_bookings' => array]
+ */
+function checkBookingConflict(SQLite3 $db, $resourceId, $startDateTime, $endDateTime, $excludeBookingId = null) {
+    $query = "SELECT b.booking_id, b.start_time, b.end_time, u.first_name, u.last_name
+              FROM Bookings b
+              LEFT JOIN Users u ON b.user_id = u.user_id
+              WHERE b.resource_id = :resourceId
+              AND b.status = 'Confirmed'
+              AND (b.start_time < :endTime AND b.end_time > :startTime)";
+    
+    if ($excludeBookingId !== null) {
+        $query .= " AND b.booking_id != :excludeId";
+    }
+    
+    $stmt = $db->prepare($query);
+    if (!$stmt) {
+        return ['has_conflict' => true, 'message' => 'Database error checking conflicts.', 'conflicting_bookings' => []];
+    }
+    
+    $stmt->bindValue(':resourceId', $resourceId, SQLITE3_INTEGER);
+    $stmt->bindValue(':startTime', $startDateTime, SQLITE3_TEXT);
+    $stmt->bindValue(':endTime', $endDateTime, SQLITE3_TEXT);
+    
+    if ($excludeBookingId !== null) {
+        $stmt->bindValue(':excludeId', $excludeBookingId, SQLITE3_INTEGER);
+    }
+    
+    $results = $stmt->execute();
+    $conflicts = [];
+    
+    while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+        $conflicts[] = [
+            'booking_id' => $row['booking_id'],
+            'start_time' => $row['start_time'],
+            'end_time' => $row['end_time'],
+            'booked_by' => $row['first_name'] ? ($row['first_name'] . ' ' . $row['last_name']) : 'Another user'
+        ];
+    }
+    $stmt->close();
+    
+    if (!empty($conflicts)) {
+        $conflictTimes = array_map(function($c) {
+            $start = date('H:i', strtotime($c['start_time']));
+            $end = date('H:i', strtotime($c['end_time']));
+            return "{$start} - {$end}";
+        }, $conflicts);
+        
+        return [
+            'has_conflict' => true,
+            'message' => 'This time slot is already booked. Existing booking(s): ' . implode(', ', $conflictTimes),
+            'conflicting_bookings' => $conflicts
+        ];
+    }
+    
+    return ['has_conflict' => false, 'message' => 'No conflicts found.', 'conflicting_bookings' => []];
+}
+
+/**
+ * Gets available time slots for a resource on a specific date, excluding already booked times.
+ * 
+ * @param SQLite3 $db The database connection object.
+ * @param int $resourceId The ID of the resource.
+ * @param string $date The date to check (YYYY-MM-DD format).
+ * @return array List of available time ranges.
+ */
+function getAvailableTimeSlotsForDate(SQLite3 $db, $resourceId, $date) {
+    $dayOfWeek = strtolower(date('l', strtotime($date)));
+    
+    // Get defined availability slots for this day
+    $availQuery = "SELECT start_time, end_time 
+                   FROM resource_availability 
+                   WHERE resource_id = :resourceId 
+                   AND LOWER(day_of_week) = :dayOfWeek
+                   ORDER BY start_time";
+    
+    $stmt = $db->prepare($availQuery);
+    $stmt->bindValue(':resourceId', $resourceId, SQLITE3_INTEGER);
+    $stmt->bindValue(':dayOfWeek', $dayOfWeek, SQLITE3_TEXT);
+    $results = $stmt->execute();
+    
+    $availableSlots = [];
+    while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+        $availableSlots[] = [
+            'start' => date('H:i', strtotime($row['start_time'])),
+            'end' => date('H:i', strtotime($row['end_time']))
+        ];
+    }
+    $stmt->close();
+    
+    if (empty($availableSlots)) {
+        return ['day_available' => false, 'slots' => [], 'message' => 'Resource not available on this day'];
+    }
+    
+    // Get existing bookings for this date
+    $bookingsQuery = "SELECT start_time, end_time 
+                      FROM Bookings 
+                      WHERE resource_id = :resourceId 
+                      AND status = 'Confirmed'
+                      AND DATE(start_time) = :date
+                      ORDER BY start_time";
+    
+    $stmt = $db->prepare($bookingsQuery);
+    $stmt->bindValue(':resourceId', $resourceId, SQLITE3_INTEGER);
+    $stmt->bindValue(':date', $date, SQLITE3_TEXT);
+    $results = $stmt->execute();
+    
+    $bookedSlots = [];
+    while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+        $bookedSlots[] = [
+            'start' => date('H:i', strtotime($row['start_time'])),
+            'end' => date('H:i', strtotime($row['end_time']))
+        ];
+    }
+    $stmt->close();
+    
+    return [
+        'day_available' => true,
+        'available_slots' => $availableSlots,
+        'booked_slots' => $bookedSlots,
+        'day_of_week' => ucfirst($dayOfWeek)
+    ];
+}
+
 //booking related code above
 
 //if you wish to connect to a hosted mysql instance uncomment this ad fill out accordingly
