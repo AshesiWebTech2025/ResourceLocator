@@ -1,5 +1,14 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 require_once('dbConnector.php');
+/**
+ * Generates the HTML card for a single resource.
+ *
+ * @param array $resource The resource data array.
+ * @return string The HTML markup.
+ */
 function generateResourceCard(array $resource): string {
     $name = htmlspecialchars($resource['name'] ?? 'Unknown Resource');
     $type = htmlspecialchars($resource['type_name'] ?? 'General');
@@ -19,7 +28,9 @@ function generateResourceCard(array $resource): string {
         </div>
     ";
 }
+//get search term from query parameter
 $searchTerm = $_GET['search'] ?? '';
+//connect to database
 $db = connectDB();
 $resources = [];
 if ($db) {
@@ -27,17 +38,33 @@ if ($db) {
     $resources = getFilteredResources($db, $searchTerm);
     $db->close();
 }
-
-$output = '';
-
+//prepare the HTML output
+$htmlOutput = '';
+$resourcesData = [];
 if (count($resources) > 0) {
     foreach ($resources as $resource) {
-        $output .= generateResourceCard($resource);
+        $htmlOutput .= generateResourceCard($resource);
+        
+        //only include resources with valid coordinates for the map
+        $lat = floatval($resource['latitude'] ?? 0);
+        $lon = floatval($resource['longitude'] ?? 0);
+        
+        if ($lat != 0 && $lon != 0) {
+            $resourcesData[] = [
+                'id' => $resource['resource_id'],
+                'name' => $resource['name'],
+                'lat' => $lat,
+                'lon' => $lon
+            ];
+        }
     }
 } else {
-    $output = '<div class="text-sm text-center text-gray-500 p-4 border border-dashed rounded-lg">No resources matched your search query.</div>';
+    $htmlOutput = '<div class="text-sm text-center text-gray-500 p-4 border border-dashed rounded-lg">No resources matched your search query.</div>';
 }
-
-//reurn generated html
-echo $output;
+//return JSON response with both HTML and resource data
+header('Content-Type: application/json');
+echo json_encode([
+    'html' => $htmlOutput,
+    'resources' => $resourcesData
+]);
 ?>
