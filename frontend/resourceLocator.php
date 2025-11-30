@@ -1,12 +1,17 @@
 <?php
 session_start();
 require_once('../backend/dbConnector.php'); 
-if (!isset($_SESSION['is_logged_in'])) {
-    $_SESSION['role'] = 'Student';
-    $_SESSION['name'] = 'Malimba'; //placeholder values for now
+if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
+    //quick message to user to show not logged in
+    $_SESSION['message'] = "Please log in to access this page.";
+    $_SESSION['message_type'] = "error";
+    //redirect to login page
+    header('Location: login_signup.php'); 
+    exit();
 }
-
 $user_role = $_SESSION['role'] ?? 'Student';
+$user_first_name = $_SESSION["first_name"];
+$user_last_name = $_SESSION["first_name"];
 $header_text = htmlspecialchars($user_role) . " Portal";
 
 //initial database connection
@@ -127,6 +132,7 @@ function generateResourceCard(array $resource): string {
         <!-- main content header -->
         <header class="bg-white shadow-sm h-16 flex justify-between items-center px-6 md:px-10 sticky top-0 z-10">
             <h1 class="text-xl md:text-2xl font-semibold text-gray-800">Ashesi Campus Resource Locator</h1>
+            <span class="text-sm md:text-base"> Welcome <?php echo $user_first_name ?></span>
             <div class="flex items-center text-ashesi-maroon font-medium border border-ashesi-maroon rounded-full py-1 px-4 cursor-pointer hover:bg-ashesi-maroon hover:text-white transition duration-200">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                 <span class="text-sm md:text-base"><?php echo $header_text; ?></span>

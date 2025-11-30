@@ -105,8 +105,13 @@ unset($_SESSION['message_type']);
                     <input type="hidden" name="action" value="signup">
 
                      <div class="mb-5">
-                        <label for="signup-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                        <input type="text" id="signup-name" name="name" placeholder="Kwame Ofori" required
+                        <label for="signup-name" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                        <input type="text" id="signup-name" name="first_name" placeholder="Kwame" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ashesi-maroon/50 focus:border-ashesi-maroon transition duration-150">
+                    </div>
+                     <div class="mb-5">
+                        <label for="signup-name" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                        <input type="text" id="signup-name" name="last_name" placeholder="Ofori" required
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ashesi-maroon/50 focus:border-ashesi-maroon transition duration-150">
                     </div>
 

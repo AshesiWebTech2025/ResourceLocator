@@ -27,7 +27,7 @@ if ($action === "login") {
         $db = connectDB();
         if ($db) {
             try {
-                $stmt = $db->prepare('SELECT user_id, password_hash, name, role FROM users WHERE ashesi_email = :email AND is_active = 1');
+                $stmt = $db->prepare('SELECT user_id, password_hash, first_name, last_name, role FROM users WHERE ashesi_email = :email AND is_active = 1');
                 $stmt->bindValue(':email', $ashesi_email, SQLITE3_TEXT);
                 $result = $stmt->execute();
                 $user = $result->fetchArray(SQLITE3_ASSOC);
@@ -38,9 +38,10 @@ if ($action === "login") {
                         //successful login
                         $_SESSION['user_id'] = $user['user_id'];
                         $_SESSION['role'] = $user['role']; // Using 'role' from the new schema
-                        $_SESSION['name'] = $user['name'];
+                        $_SESSION['first_name'] = $user['first_name'];
+                        $_SESSION['last_name']= $user['last_name'];
                         $_SESSION['is_logged_in'] = true;
-                        $_SESSION['message'] = "Welcome back, " . $user['name'] . "!";
+                        $_SESSION['message'] = "Welcome back, " . $user['first_name'] . "!";
                         $_SESSION['message_type'] = "success";
                         
                         //routing users based on roles. for now all rols go to resouceLocator.html 
@@ -66,7 +67,7 @@ if ($action === "login") {
                     $message = "Invalid email or password, or account is inactive.";
                 }
             } catch (Exception $e) {
-                // *** DEBUGGING: Capture specific exception message ***
+                //capturing specific error
                 $message = "A system error occurred during login: " . $e->getMessage();
                 error_log("Login error: " . $e->getMessage());
             }
@@ -80,13 +81,14 @@ if ($action === "login") {
     header('Location: ../frontend/login_signup.php');
     exit();
 } elseif ($action === "signup") {
-    $name = htmlspecialchars(trim($_POST["name"] ?? ""));
+    $first_name = htmlspecialchars(trim($_POST["first_name"] ?? ""));
+    $last_name = htmlspecialchars(trim($_POST["last_name"] ?? ""));
     $ashesi_email = htmlspecialchars(trim($_POST["email"] ?? ""));
     $password = $_POST["password"] ?? '';
     $cpassword = $_POST["confirm_password"] ?? '';
     $role = $_POST["role"] ?? '';
     //validation
-    if (empty($name) || empty($ashesi_email) || empty($password) || empty($cpassword) || empty($role)) {
+    if (empty($first_name) || empty($last_name) || empty($ashesi_email) || empty($password) || empty($cpassword) || empty($role)) {
         $message = "All fields are required.";
         $passedValidation = false;
     } elseif ($password !== $cpassword) {
@@ -121,9 +123,10 @@ if ($action === "login") {
                 } else {
                     $password_hash = password_hash($password, PASSWORD_DEFAULT);
                     //insert new user
-                    $insertStmt = $db->prepare('INSERT INTO users (name, ashesi_email, password_hash, role) 
-                                                VALUES (:name, :email, :pass, :role)');
-                    $insertStmt->bindValue(':name', $name, SQLITE3_TEXT);
+                    $insertStmt = $db->prepare('INSERT INTO users (first_name, last_name, ashesi_email, password_hash, role) 
+                                                VALUES (:first_name, :last_name, :email, :pass, :role)');
+                    $insertStmt->bindValue(':first_name', $first_name, SQLITE3_TEXT);
+                    $insertStmt->bindValue(':last_name', $last_name, SQLITE3_TEXT);
                     $insertStmt->bindValue(':email', $ashesi_email, SQLITE3_TEXT);
                     $insertStmt->bindValue(':pass', $password_hash, SQLITE3_TEXT);
                     $insertStmt->bindValue(':role', $role, SQLITE3_TEXT);
