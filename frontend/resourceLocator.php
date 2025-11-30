@@ -113,9 +113,7 @@ function generateResourceCard(array $resource): string {
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                 <span class="text-sm md:text-base"><?php echo $header_text; ?></span>
             </div>
-            <button id="mobile-menu-button" class="md:hidden p-2 text-ashesi-maroon">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            </button>
+            
         </header>
         
         <main class="p-4 md:p-8 flex-1 h-full flex flex-col">
