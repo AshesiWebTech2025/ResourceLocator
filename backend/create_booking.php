@@ -60,26 +60,18 @@ if (strtotime($startDateTime) < time()) {
 }
 
 try {
-    // Check for booking conflicts
-    $conflictStmt = $db->prepare("
-        SELECT COUNT(*) as conflict_count
-        FROM Bookings
-        WHERE resource_id = :resource_id
-        AND status = 'Confirmed'
-        AND (
-            (start_time < :end_time AND end_time > :start_time)
-        )
-    ");
+    // VALIDATION 1: Check if booking is within allowed availability slots for the resource
+    $availabilityCheck = isBookingWithinAvailability($db, $resourceId, $bookingDate, $startTime, $endTime);
+    if (!$availabilityCheck['valid']) {
+        $_SESSION['booking_error'] = $availabilityCheck['message'];
+        header('Location: ../frontend/bookings.php');
+        exit;
+    }
     
-    $conflictStmt->bindValue(':resource_id', $resourceId, SQLITE3_INTEGER);
-    $conflictStmt->bindValue(':start_time', $startDateTime, SQLITE3_TEXT);
-    $conflictStmt->bindValue(':end_time', $endDateTime, SQLITE3_TEXT);
-    
-    $conflictResult = $conflictStmt->execute();
-    $conflictRow = $conflictResult->fetchArray(SQLITE3_ASSOC);
-    
-    if ($conflictRow['conflict_count'] > 0) {
-        $_SESSION['booking_error'] = 'This resource is already booked during the selected time slot.';
+    // VALIDATION 2: Check for conflicting bookings (double booking prevention)
+    $conflictCheck = checkBookingConflict($db, $resourceId, $startDateTime, $endDateTime);
+    if ($conflictCheck['has_conflict']) {
+        $_SESSION['booking_error'] = $conflictCheck['message'];
         header('Location: ../frontend/bookings.php');
         exit;
     }

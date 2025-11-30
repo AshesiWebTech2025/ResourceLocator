@@ -1,11 +1,31 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 session_start();
+
+// Check if this is an API request
+$isApiRequest = isset($_GET['action']);
+
+// For API requests, suppress error output to ensure clean JSON
+if ($isApiRequest) {
+    ini_set('display_errors', 0);
+    ini_set('display_startup_errors', 0);
+    error_reporting(0);
+    ob_start(); // Start output buffering to catch any stray output
+} else {
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
+}
+
 require_once('../backend/dbConnector.php'); 
 
 if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
+    if ($isApiRequest) {
+        // For API requests, return JSON instead of redirecting
+        ob_end_clean();
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Session expired. Please log in again.']);
+        exit;
+    }
     $_SESSION['message'] = "please log in to access this page.";
     $_SESSION['message_type'] = "error";
     header('Location: login_signup.php'); 
@@ -18,14 +38,16 @@ $initialHotspots = [];
 
 if (!$db) {
     $db_error = true;
-    if (isset($_GET['action'])) {
+    if ($isApiRequest) {
+        ob_end_clean();
         header('Content-Type: application/json');
         echo json_encode(['success' => false, 'message' => 'database connection failed.']);
         exit;
     }
 }
 
-if (!$db_error && isset($_GET['action'])) {
+if (!$db_error && $isApiRequest) {
+    ob_end_clean(); // Clear any buffered output
     header('Content-Type: application/json');
     $action = $_GET['action'];
     $response = ['success' => false, 'message' => 'invalid action'];
@@ -46,12 +68,16 @@ if (!$db_error && isset($_GET['action'])) {
                     $startParts = explode(':', $slot['start_time']);
                     $endParts = explode(':', $slot['end_time']);
                     
+                    // Return both formats for compatibility
                     $formattedSlots[] = [
-                        'day' => $slot['day_of_week'], 
+                        'day' => strtolower($slot['day_of_week']),  // lowercase to match select values
+                        'day_of_week' => strtolower($slot['day_of_week']),
                         'start_hour' => intval($startParts[0]),
                         'start_minute' => intval($startParts[1]),
                         'end_hour' => intval($endParts[0]),
-                        'end_minute' => intval($endParts[1])
+                        'end_minute' => intval($endParts[1]),
+                        'start_time' => $slot['start_time'],
+                        'end_time' => $slot['end_time']
                     ];
                 }
                 $response = ['success' => true, 'data' => $formattedSlots];
@@ -63,12 +89,19 @@ if (!$db_error && isset($_GET['action'])) {
         case 'updateSlots':
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $rawData = file_get_contents('php://input');
+                
+                // Log the raw input for debugging
+                error_log('updateSlots raw input: ' . $rawData);
+                
                 $data = json_decode($rawData, true);
                 
                 if (json_last_error() !== JSON_ERROR_NONE) {
-                    $response['message'] = 'invalid json data: ' . json_last_error_msg();
+                    $response['message'] = 'invalid json data: ' . json_last_error_msg() . ' Raw: ' . substr($rawData, 0, 200);
+                    error_log('JSON decode error: ' . json_last_error_msg());
                     break;
                 }
+                
+                error_log('updateSlots decoded data: ' . print_r($data, true));
                 
                 $resourceId = isset($data['resource_id']) ? intval($data['resource_id']) : 0;
                 $slots = isset($data['slots']) ? $data['slots'] : null;
@@ -77,13 +110,59 @@ if (!$db_error && isset($_GET['action'])) {
                     // convert number inputs to time strings
                     $dbSlots = [];
                     foreach ($slots as $slot) {
-                        if (isset($slot['day'], $slot['start_hour'], $slot['start_minute'], $slot['end_hour'], $slot['end_minute'])) {
-                            // format as HH:MM:SS
-                            $startTime = sprintf('%02d:%02d:00', $slot['start_hour'], $slot['start_minute']);
-                            $endTime = sprintf('%02d:%02d:00', $slot['end_hour'], $slot['end_minute']);
-                            
+                        $day = null;
+                        $startTime = null;
+                        $endTime = null;
+                        
+                        // Get day - handle both 'day' and 'day_of_week' keys
+                        if (isset($slot['day'])) {
+                            $day = $slot['day'];
+                        } elseif (isset($slot['day_of_week'])) {
+                            $day = $slot['day_of_week'];
+                        }
+                        
+                        // Handle start_hour/start_minute format
+                        if (isset($slot['start_hour']) && isset($slot['start_minute'])) {
+                            $startTime = sprintf('%02d:%02d:00', intval($slot['start_hour']), intval($slot['start_minute']));
+                        }
+                        // Handle start_time string format (HH:MM or HH:MM:SS)
+                        elseif (isset($slot['start_time'])) {
+                            $parts = explode(':', $slot['start_time']);
+                            if (count($parts) >= 2) {
+                                $startTime = sprintf('%02d:%02d:00', intval($parts[0]), intval($parts[1]));
+                            }
+                        }
+                        // Handle 'start' string format
+                        elseif (isset($slot['start'])) {
+                            $parts = explode(':', $slot['start']);
+                            if (count($parts) >= 2) {
+                                $startTime = sprintf('%02d:%02d:00', intval($parts[0]), intval($parts[1]));
+                            }
+                        }
+                        
+                        // Handle end_hour/end_minute format
+                        if (isset($slot['end_hour']) && isset($slot['end_minute'])) {
+                            $endTime = sprintf('%02d:%02d:00', intval($slot['end_hour']), intval($slot['end_minute']));
+                        }
+                        // Handle end_time string format (HH:MM or HH:MM:SS)
+                        elseif (isset($slot['end_time'])) {
+                            $parts = explode(':', $slot['end_time']);
+                            if (count($parts) >= 2) {
+                                $endTime = sprintf('%02d:%02d:00', intval($parts[0]), intval($parts[1]));
+                            }
+                        }
+                        // Handle 'end' string format
+                        elseif (isset($slot['end'])) {
+                            $parts = explode(':', $slot['end']);
+                            if (count($parts) >= 2) {
+                                $endTime = sprintf('%02d:%02d:00', intval($parts[0]), intval($parts[1]));
+                            }
+                        }
+                        
+                        // Only add if we have all required fields
+                        if ($day && $startTime && $endTime) {
                             $dbSlots[] = [
-                                'day' => $slot['day'],
+                                'day' => $day,
                                 'start' => $startTime,
                                 'end' => $endTime
                             ];
@@ -139,20 +218,23 @@ if (!$db_error && $db) {
         </div>
 
         <nav class="flex-grow p-4 space-y-2">
-            <a href="resourceAllocator.html" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Resource Allocator</a>
+            <a href="resourceAllocator.php" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Resource Allocator</a>
             <a href="available_sessions.php" class="flex items-center p-3 rounded-lg bg-white/20 transition duration-150 ease-in-out font-medium">Available Sessions</a>
-            <a href="#" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Analytics</a>
+            <a href="home.php" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Home</a>
         </nav>
 
         <div class="p-4 space-y-2 border-t border-white/20">
             <a href="#" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Settings</a>
-            <a href="#" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Sign Out</a>
+            <a href="login_signup.php" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Sign Out</a>
         </div>
     </aside>
 
     <div class="flex-1 flex flex-col overflow-y-auto main-content">
-        <header class="bg-white shadow-sm h-16 flex justify-between items-center px-6 md:px-10 sticky top-0 z-10">
-            <h1 class="text-xl md:text-2xl font-semibold text-gray-800">Available Sessions</h1>
+        <header class="bg-white shadow-sm h-16 flex items-center px-6 md:px-10 sticky top-0 z-10">
+            <button id="hamburgerBtn" class="hamburger-btn md:hidden mr-4 p-2 focus:outline-none focus:ring-2 focus:ring-ashesi-maroon rounded" aria-label="Toggle menu" aria-expanded="false" type="button">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+            </button>
+            <h1 class="text-xl md:text-2xl font-semibold text-gray-800 mr-auto">Available Sessions</h1>
             <div class="flex items-center text-ashesi-maroon font-medium border border-ashesi-maroon rounded-full py-1 px-4">Admin Mode</div>
         </header>
 
@@ -292,7 +374,10 @@ if (!$db_error && $db) {
 
             function sortSlots(slots) {
                 return slots.sort((a, b) => {
-                    if (dayOrder[a.day] !== dayOrder[b.day]) return dayOrder[a.day] - dayOrder[b.day];
+                    // Handle both 'day' and 'day_of_week' keys
+                    const dayA = (a.day || a.day_of_week || '').toLowerCase();
+                    const dayB = (b.day || b.day_of_week || '').toLowerCase();
+                    if (dayOrder[dayA] !== dayOrder[dayB]) return (dayOrder[dayA] || 99) - (dayOrder[dayB] || 99);
                     if (a.start_hour !== b.start_hour) return a.start_hour - b.start_hour;
                     return a.start_minute - b.start_minute;
                 });
@@ -313,9 +398,11 @@ if (!$db_error && $db) {
                 sortedSlots.forEach((slot, index) => {
                     const li = document.createElement('li');
                     li.className = 'flex items-center justify-between bg-white p-3 rounded border';
+                    // Handle both 'day' and 'day_of_week' keys
+                    const dayName = slot.day || slot.day_of_week || 'Unknown';
                     li.innerHTML = `
                         <div class="text-sm">
-                            <span class="font-medium capitalize">${slot.day}</span> — ${formatTime(slot.start_hour, slot.start_minute)} to ${formatTime(slot.end_hour, slot.end_minute)}
+                            <span class="font-medium capitalize">${dayName}</span> — ${formatTime(slot.start_hour, slot.start_minute)} to ${formatTime(slot.end_hour, slot.end_minute)}
                         </div>
                         <button type="button" class="text-red-600 hover:text-red-800 text-sm font-medium" data-index="${index}">
                             Remove
@@ -442,43 +529,75 @@ if (!$db_error && $db) {
                 button.disabled = true;
                 hideMessage();
                 
+                // Get slots and prepare data
                 const slots = resourceSlots[currentResource.resource_id] || [];
+                console.log('Slots to save:', slots);
+                
+                // Convert slots to ensure consistent format
+                const normalizedSlots = slots.map(function(slot) {
+                    return {
+                        day: slot.day || slot.day_of_week || 'monday',
+                        start_hour: parseInt(slot.start_hour, 10) || 0,
+                        start_minute: parseInt(slot.start_minute, 10) || 0,
+                        end_hour: parseInt(slot.end_hour, 10) || 0,
+                        end_minute: parseInt(slot.end_minute, 10) || 0
+                    };
+                });
                 
                 const payload = {
                     resource_id: currentResource.resource_id,
-                    slots: slots
+                    slots: normalizedSlots
                 };
                 
-                console.log('Saving payload:', payload);
+                console.log('Sending payload:', JSON.stringify(payload));
                 
-                fetch('available_sessions.php?action=updateSlots', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload)
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error('Network error');
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Save response:', data);
-                    if (data.success) {
-                        showMessage('availability saved successfully!', 'success');
-                        setTimeout(closeModal, 1000);
-                    } else {
-                        throw new Error(data.message || 'Save failed');
+                // Use XMLHttpRequest for maximum compatibility
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'available_sessions.php?action=updateSlots', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        console.log('XHR status:', xhr.status);
+                        console.log('XHR response:', xhr.responseText);
+                        
+                        button.textContent = originalText;
+                        button.disabled = false;
+                        
+                        if (xhr.status === 200) {
+                            try {
+                                const data = JSON.parse(xhr.responseText);
+                                if (data.success) {
+                                    showMessage('availability saved successfully!', 'success');
+                                    setTimeout(closeModal, 1000);
+                                } else {
+                                    showMessage('Save failed: ' + (data.message || 'Unknown error'), 'error');
+                                }
+                            } catch (e) {
+                                console.error('Parse error:', e);
+                                showMessage('Invalid server response: ' + xhr.responseText.substring(0, 100), 'error');
+                            }
+                        } else {
+                            showMessage('Server error: ' + xhr.status, 'error');
+                        }
                     }
-                })
-                .catch(error => {
-                    console.error('Save error:', error);
-                    showMessage('failed to save: ' + error.message, 'error');
-                })
-                .finally(() => {
+                };
+                
+                xhr.onerror = function() {
+                    console.error('XHR error');
                     button.textContent = originalText;
                     button.disabled = false;
-                });
+                    showMessage('Network error occurred', 'error');
+                };
+                
+                try {
+                    xhr.send(JSON.stringify(payload));
+                } catch (e) {
+                    console.error('Send error:', e);
+                    button.textContent = originalText;
+                    button.disabled = false;
+                    showMessage('Could not send request: ' + e.message, 'error');
+                }
             });
 
             document.getElementById('closeModal').addEventListener('click', closeModal);
@@ -488,6 +607,38 @@ if (!$db_error && $db) {
             });
 
             renderResourceList();
+        });
+    </script>
+
+    <script>
+        // Hamburger menu functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const sidebar = document.getElementById('sidebar');
+
+            if (hamburgerBtn && sidebar) {
+                hamburgerBtn.addEventListener('click', () => {
+                    const isExpanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+                    sidebar.classList.toggle('-translate-x-full');
+                    hamburgerBtn.setAttribute('aria-expanded', !isExpanded);
+
+                    if (!isExpanded) {
+                        document.body.classList.add('mobile-nav-open');
+                    } else {
+                        document.body.classList.remove('mobile-nav-open');
+                    }
+                });
+                
+                sidebar.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        if (window.innerWidth < 768) {
+                            sidebar.classList.add('-translate-x-full');
+                            hamburgerBtn.setAttribute('aria-expanded', 'false');
+                            document.body.classList.remove('mobile-nav-open');
+                        }
+                    });
+                });
+            }
         });
     </script>
 
