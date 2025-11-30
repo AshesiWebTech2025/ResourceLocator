@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 //usiing sqlite to connect to a db file locally
 $dbPath = "../setup/mockDatabase.db";
 
@@ -23,7 +26,8 @@ function connectDB(){
         $db->exec("CREATE TABLE IF NOT EXISTS Users (
             user_id INTEGER PRIMARY KEY AUTOINCREMENT,
             ashesi_email TEXT UNIQUE NOT NULL,       
-            name TEXT NOT NULL,                     
+            first_name TEXT NOT NULL,                     
+            last_name Text NOT NULL,
             role TEXT NOT NULL CHECK(role IN ('Student', 'Faculty', 'Staff', 'Visitor')),
             password_hash TEXT NOT NULL,            
             is_active INTEGER NOT NULL DEFAULT 1,   

@@ -39,18 +39,18 @@ unset($_SESSION['message_type']);
         }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="bg-gray-50 font-sans antialiased flex items-center justify-center min-h-screen p-4">
-
+<body class="bg-gray-50 font-sans antialiased flex items-center justify-center min-h-screen p-4 loginBody">
     <!-- auth card -->
     <div class="w-full max-w-md">
-
-        <!-- app header -->
-        <div class="text-center mb-8">
+        <!-- app header - UPDATED FOR VISIBILITY -->
+        <!-- Added a semi-transparent background (bg-white/80) and backdrop blur to make the text pop against the bright background image. -->
+        <div class="text-center mb-8 p-4 rounded-xl shadow-xl bg-white/80 backdrop-blur-sm border border-gray-200">
             <h1 class="text-3xl font-extrabold text-ashesi-maroon mb-2">Ashesi Resource Locator</h1>
-            <p class="text-gray-500 text-lg">Student Access Portal</p>
+            <!-- Changed text-gray-500 to text-gray-800 for better contrast -->
+            <p class="text-gray-800 text-lg font-semibold">Student Access Portal</p>
         </div>
-
         <!-- system display message -->
         <?php if ($message): ?>
             <div class="mb-6">
@@ -61,10 +61,8 @@ unset($_SESSION['message_type']);
                 </div>
             </div>
         <?php endif; ?>
-
         <!-- form card -->
         <div class="bg-white p-8 md:p-10 rounded-xl shadow-2xl border border-gray-100">
-            
             <!--login form -->
             <div id="login-form">
                 <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Welcome Back!</h2>
@@ -98,7 +96,6 @@ unset($_SESSION['message_type']);
                     </button>
                 </p>
             </div>
-            
             <!-- hidden signup form -->
             <div id="signup-form" class="hidden">
                 <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Create Account</h2>
@@ -125,7 +122,8 @@ unset($_SESSION['message_type']);
                         <select id="signup-role" name="role" required
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ashesi-maroon/50 focus:border-ashesi-maroon transition duration-150">
                             <option value="" disabled selected>Select your role</option>
-                            <option value="Admin">Admin</option>
+                            <!-- user should not be able to signup as admin -->
+                            <!-- <option value="Admin">Admin</option>  -->                              
                             <option value="Student">Student</option>
                             <option value="Faculty">Faculty</option>
                             <option value="Staff">Staff</option>
@@ -166,7 +164,6 @@ unset($_SESSION['message_type']);
 
         </div>
     </div>
-    
     <!-- JavaScript for toggling forms and client-side validation -->
     <script>
         const style = document.createElement('style');
@@ -258,13 +255,11 @@ unset($_SESSION['message_type']);
                 confirmError.classList.add('hidden');
                 confirmPasswordInput.classList.remove('border-red-500');
             }
-
             //password strength check. Submissioin is prevented if password is weak
             const strength = checkPasswordStrength(passwordInput.value);
             if (passwordInput.value.length > 0 && strength < 2) {
                 isValid = false;//preventing submission if the password is too weak
             }
-
             //disabling or enabling the button based on validity
             submitBtn.disabled = !isValid; 
             if (!isValid) {
@@ -283,10 +278,8 @@ unset($_SESSION['message_type']);
             updateStrengthIndicator(strength);
             validateForm(); 
         });
-
         emailInput.addEventListener('input', validateForm);
         confirmPasswordInput.addEventListener('input', validateForm);
-
         //prevening form submission if client-side validation fails
         signupForm.addEventListener('submit', (e) => {
             if (!validateForm()) {
@@ -294,7 +287,6 @@ unset($_SESSION['message_type']);
                 //php error messages will take over
             }
         });
-
         //iinitializing form view.Primarily used when form fails, 
         document.addEventListener('DOMContentLoaded', () => {
              //if any server-side message exists (usually means failure), show the signup form if fields were posted

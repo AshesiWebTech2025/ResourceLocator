@@ -174,3 +174,14 @@ body {
 }
 /* end of ashesi-locator styles */
        
+
+/* start of login styles */
+.loginBody {
+    background-image: url('../images/ashesiBackground.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+}
+/* end of login styles */

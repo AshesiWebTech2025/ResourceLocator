@@ -9,11 +9,9 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: ../frontend/login_signup.php");
     exit();
 }
-
 $action = $_POST["action"] ?? "";
 $passedValidation = true;
 $message = "";
-
 if ($action === "login") {
     $ashesi_email = htmlspecialchars(trim($_POST["login_email"] ?? ""));
     $password = $_POST["login_password"] ?? '';
@@ -25,7 +23,6 @@ if ($action === "login") {
         $message = "Enter a valid Ashesi email address (ending with @ashesi.edu.gh).";
         $passedValidation = false;
     }
-    
     if ($passedValidation) {
         $db = connectDB();
         if ($db) {
@@ -35,7 +32,6 @@ if ($action === "login") {
                 $result = $stmt->execute();
                 $user = $result->fetchArray(SQLITE3_ASSOC);
                 $db->close();
-
                 if ($user) {
                     $passwordValid = password_verify($password, $user['password_hash']);
                     if ($passwordValid) {
@@ -70,7 +66,8 @@ if ($action === "login") {
                     $message = "Invalid email or password, or account is inactive.";
                 }
             } catch (Exception $e) {
-                $message = "A system error occurred during login. Please try again.";
+                // *** DEBUGGING: Capture specific exception message ***
+                $message = "A system error occurred during login: " . $e->getMessage();
                 error_log("Login error: " . $e->getMessage());
             }
         } else {
@@ -130,9 +127,7 @@ if ($action === "login") {
                     $insertStmt->bindValue(':email', $ashesi_email, SQLITE3_TEXT);
                     $insertStmt->bindValue(':pass', $password_hash, SQLITE3_TEXT);
                     $insertStmt->bindValue(':role', $role, SQLITE3_TEXT);
-                    
                     $success = $insertStmt->execute();
-
                     if ($success) {
                         $message = "Account created successfully! Please log in.";
                         $_SESSION['message_type'] = "success";
@@ -140,20 +135,24 @@ if ($action === "login") {
                         header('Location: ../frontend/login_signup.php'); // Redirect to login page
                         exit();
                     } else {
-                        $message = "Registration failed due to a database error.";
+//capturing specific error message with database
+                        $message = "Registration failed: DB Error - " . $db->lastErrorMsg();
                         error_log("DB Insert Failed for new user: " . $db->lastErrorMsg());
                     }
                 }
             } catch (Exception $e) {
-                $message = "A system error occurred during registration. Please try again.";
+                //capturing exception errors
+                $message = "A system error occurred during registration: " . $e->getMessage();
                 error_log("Registration error: " . $e->getMessage());
             }
-            $db->close();
+            //close db only if was successfull open
+            if ($db) {
+                $db->close();
+            }
         } else {
             $message = "Server maintenance in progress. Please try again later.";
         }
     }
-
     //redirect user. to signup if login failed
     $_SESSION['message'] = $message;
     $_SESSION['message_type'] = 'error';
