@@ -1,29 +1,43 @@
 <?php
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
-    session_start();
-    require_once('../backend/dbConnector.php'); 
+//setup handling
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+session_start();
+require_once('../backend/dbConnector.php'); 
+//authentication check
 if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
     $_SESSION['message'] = "Please log in to access this page.";
     $_SESSION['message_type'] = "error";
     header('Location: login_signup.php'); 
     exit();
 }
+//user info
 $user_role = $_SESSION['role'] ?? 'Student';
 $user_first_name = $_SESSION["first_name"];
 $user_last_name = $_SESSION["last_name"];
 $userId = $_SESSION["user_id"];
 $header_text = htmlspecialchars($user_role) . " Portal";
+//database connection and data fetch
 $db = connectDB();
-$bookings = [];
-$query_error = false;
 $resources = [];
 $bookings = [];
-if ($db) {
-    $resources = getAllResources($db);
-    $bookngs = getAllBookings($db, $userId);
+$query_error = false;
+
+if ($db) { 
+    //get all resources for the bookin modal
+    $resources = getAllResources($db); 
+    //get all bookings for the user using getAllBookings
+    $bookings = getAllBookings($db, $userId);
+    //check if db call was unsuccessful
+    if ($bookings === false) {
+        $query_error = true;
+        $bookings = [];
+    }
     $db->close();
+} else {
+    //if data basec onnection failed
+    $query_error = true;
 }
 ?>
 <!DOCTYPE html>
@@ -32,11 +46,9 @@ if ($db) {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Bookings — Ashesi Locator</title>
-
   <!-- Project stylesheet -->
-  <link rel="stylesheet" href="./css/style.css">
-
-  <!-- Tailwind (match index.html setup) -->
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -53,20 +65,16 @@ if ($db) {
       }
     }
   </script>
-
-  <!-- jQuery (for animations/effects, kept from original) -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-  <!-- App script (defer to let DOM load) -->
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>\
+  <!-- App script -->
   <script src="./js/main.js" defer></script>
 </head>
 <body class="bg-gray-50 font-sans antialiased flex h-screen overflow-hidden">
-
   <!-- Hamburger toggle (mobile) -->
   <button id="hamburgerBtn" class="hamburger-btn" aria-label="Toggle menu" aria-expanded="false" type="button">
     <span></span><span></span><span></span>
   </button>
-
   <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out bg-ashesi-maroon text-white w-64 flex flex-col z-20 shadow-xl">
       <div class="p-6 flex items-center h-16 border-b border-white/20">
           <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
@@ -93,7 +101,7 @@ if ($db) {
       <h1 class="text-xl md:text-2xl font-semibold text-gray-800">My Bookings</h1>
       <div class="flex items-center gap-4">
         <button onclick="openBookingModal()" class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition duration-150">Book New Resource</button>
-        <button id="toggle-map-btn" class="bg-ashesi-maroon text-white font-semibold py-2 px-4 rounded-lg hover:bg-ashesi-maroon/90 transition duration-150">Toggle Map View</button>
+        <button onclick="window.lco" id="toggle-map-btn" class="bg-ashesi-maroon text-white font-semibold py-2 px-4 rounded-lg hover:bg-ashesi-maroon/90 transition duration-150" ><a href="resourceLocator.php">Toggle Map View</a></button>
       </div>
     </header>
 
@@ -121,13 +129,12 @@ if ($db) {
           <div id="bookings-list" class="space-y-4" aria-live="polite">
             
             <?php if ($query_error): ?>
-                <!-- Display error message if the query failed -->
                 <div class="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg">
                     <strong>Error:</strong> Failed to load bookings. Please try again.
                 </div>
 
             <?php elseif (empty($bookings)): ?>
-                <!-- Empty state (shown if no bookings were found) -->
+                <!-- Empty state -->
                 <div id="empty-state" class="bg-white p-8 rounded-xl shadow border border-gray-100 text-center">
                   <svg class="mx-auto w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 6h18M5 18h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                   <h4 class="text-lg font-semibold text-gray-800 mb-2">No bookings yet</h4>
@@ -136,7 +143,6 @@ if ($db) {
                 </div>
 
             <?php else: ?>
-                <!-- Loop through and display each booking -->
                 <?php foreach ($bookings as $booking): ?>
                     <?php
                         $startTime = new DateTime($booking['start_time']);
@@ -145,7 +151,7 @@ if ($db) {
                         $isPast = $endTime < $now;
                         $isCancellable = $booking['status'] === 'Confirmed' && $startTime > $now;
                         
-                        // Prepare booking data as JSON for JavaScript
+                        //preparebookingdataasJSONforJavaScript
                         $bookingJson = json_encode([
                             'booking_id' => $booking['booking_id'] ?? 0,
                             'resource_name' => $booking['resource_name'],
@@ -190,7 +196,6 @@ if ($db) {
 
           </div>
         </div>
-
         <!-- Sidebar summary column -->
         <aside class="bg-white p-6 rounded-xl shadow border border-gray-100 h-fit">
           <h4 class="text-lg font-semibold text-gray-800 mb-3">Booking Summary</h4>
@@ -199,6 +204,7 @@ if ($db) {
             <li>Upcoming: <span class="font-medium text-gray-800">
                 <?php 
                     $now = new DateTime();
+                                //call upcomoning bookings
                     $upcoming = array_filter($bookings, function($b) use ($now) {
                         $start = new DateTime($b['start_time']);
                         return $start > $now && $b['status'] === 'Confirmed';
@@ -208,9 +214,10 @@ if ($db) {
             </span></li>
             <li>Past: <span class="font-medium text-gray-800">
                 <?php 
+                    //calculate the past bookings count in php
                     $past = array_filter($bookings, function($b) use ($now) {
                         $end = new DateTime($b['end_time']);
-                        return $end < $now || $b['status'] === 'Completed';
+                        return $end < $now || $b['status'] === 'Completed' || $b['status'] === 'Cancelled';
                     });
                     echo count($past);
                 ?>
@@ -408,45 +415,36 @@ if ($db) {
           document.getElementById('bookingModal').classList.remove('hidden');
           document.body.style.overflow = 'hidden';
       }
-
       function closeBookingModal() {
           document.getElementById('bookingModal').classList.add('hidden');
           document.body.style.overflow = 'auto';
       }
-
       function viewBookingDetails(booking) {
           const modal = document.getElementById('viewBookingModal');
-          
           // Parse dates
           const startDate = new Date(booking.start_time);
           const endDate = new Date(booking.end_time);
-          
           // Format dates and times
           const dateStr = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
           const startTimeStr = startDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
           const endTimeStr = endDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-          
           // Status badge styling
           let statusClass = 'bg-blue-100 text-blue-800';
           if (booking.status === 'Confirmed') statusClass = 'bg-green-100 text-green-800';
           if (booking.status === 'Cancelled') statusClass = 'bg-red-100 text-red-800';
           if (booking.status === 'Completed') statusClass = 'bg-gray-100 text-gray-800';
-          
           // Populate modal
           document.getElementById('view-resource-name').textContent = booking.resource_name;
           document.getElementById('view-date').textContent = dateStr;
           document.getElementById('view-start-time').textContent = startTimeStr;
           document.getElementById('view-end-time').textContent = endTimeStr;
           document.getElementById('view-purpose').textContent = booking.purpose;
-          
           const statusEl = document.getElementById('view-status');
           statusEl.textContent = booking.status;
           statusEl.className = `inline-block px-2 py-1 rounded-full text-xs font-medium ${statusClass}`;
-          
           modal.classList.remove('hidden');
           document.body.style.overflow = 'hidden';
       }
-
       function closeViewModal() {
           document.getElementById('viewBookingModal').classList.add('hidden');
           document.body.style.overflow = 'auto';
@@ -462,12 +460,10 @@ if ($db) {
           document.getElementById('cancelBookingModal').classList.add('hidden');
           document.body.style.overflow = 'auto';
       }
-
       // Close modals when clicking outside
       document.getElementById('bookingModal')?.addEventListener('click', function(e) {
           if (e.target === this) closeBookingModal();
       });
-
       document.getElementById('viewBookingModal')?.addEventListener('click', function(e) {
           if (e.target === this) closeViewModal();
       });
