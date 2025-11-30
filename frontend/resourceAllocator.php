@@ -1,5 +1,18 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 session_start();
+require_once('../backend/dbConnector.php'); 
+if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
+    $_SESSION['message'] = "Please log in to access this page.";
+    $_SESSION['message_type'] = "error";
+    header('Location: login_signup.php'); 
+    exit();
+}
+$user_role = $_SESSION['role'] ?? 'Admin';
+$user_first_name = $_SESSION["first_name"];
+$user_last_name = $_SESSION["last_name"];
 ?>
 
 <!DOCTYPE html>
@@ -105,13 +118,9 @@ session_start();
             </div>
 
             <!-- Mobile Menu Button (Hidden on Desktop) -->
-            <button id="mobile-menu-button" class="md:hidden p-2 text-ashesi-maroon">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
-                    </path>
-                </svg>
-            </button>
+            <button id="hamburgerBtn" class="hamburger-btn md:hidden mr-4 p-2 focus:outline-none focus:ring-2 focus:ring-ashesi-maroon rounded" aria-label="Toggle menu" aria-expanded="false" type="button">
+          <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+      </button>
         </header>
 
         <!-- Body -->
@@ -269,7 +278,41 @@ session_start();
     <script src="js/resourceAllocator.js"></script>
     <!--<script defer src="js/main.js"></script>-->
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          const hamburgerBtn = document.getElementById('hamburgerBtn');
+          const sidebar = document.getElementById('sidebar');
 
+          if (hamburgerBtn && sidebar) {
+              hamburgerBtn.addEventListener('click', () => {
+                  const isExpanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+                  
+                  // Toggle sidebar visibility class
+                  sidebar.classList.toggle('-translate-x-full');
+                  
+                  // Toggle button state and body overflow for mobile
+                  hamburgerBtn.setAttribute('aria-expanded', !isExpanded);
+
+                  if (!isExpanded) {
+                      // Lock body scrolling when sidebar is open
+                      document.body.classList.add('mobile-nav-open');
+                  } else {
+                      // Re-enable body scrolling
+                      document.body.classList.remove('mobile-nav-open');
+                  }
+              });
+              sidebar.querySelectorAll('a').forEach(link => {
+                  link.addEventListener('click', () => {
+                      if (window.innerWidth < 768) {
+                          sidebar.classList.add('-translate-x-full');
+                          hamburgerBtn.setAttribute('aria-expanded', 'false');
+                          document.body.classList.remove('mobile-nav-open');
+                      }
+                  });
+              });
+          }
+      });
+    </script>
 
 </body>
 

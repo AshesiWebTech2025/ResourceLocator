@@ -295,6 +295,125 @@ function cancelBooking(SQLite3 $db, $bookingId, $userId){
     }
     return false;
 }
+
+//code for setting resource availabilty below
+/**
+ * Fetches all resources marked as bookable (is_bookable = 1).
+ *
+ * @param SQLite3 $db The database connection object.
+ * @return array List of bookable resources.
+ */
+function getBookableResources(SQLite3 $db) {
+    $resources = [];
+    $query = "SELECT r.*, rt.type_name 
+              FROM Resources r 
+              JOIN Resource_Types rt ON r.type_id = rt.type_id
+              WHERE r.is_bookable = 1
+              ORDER BY r.name";
+    $results = $db->query($query);
+    if ($results) {
+        while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+            //convert to a manner easy for js consumption later
+            $resources[] = [
+                'resource_id' => $row['resource_id'],
+                'name' => $row['name'],
+                'capacity' => $row['capacity'],
+                'description' => $row['description'],
+                'type_name' => $row['type_name'],
+                'latitude' => $row['latitude'],
+                'longitude' => $row['longitude']
+            ];
+        }
+    }
+    return $resources;
+}
+/**
+ * Retrieves the resource_availability slots for a specific resource.
+ *
+ * @param SQLite3 $db The database connection object.
+ * @param int $resourceId The ID of the resource.
+ * @return array List of availability slots.
+ */
+function getResourceAvailability(SQLite3 $db, $resourceId) {
+    $slots = [];
+    $query = "SELECT 
+                availability_id, 
+                day_of_week, 
+                start_time, 
+                end_time 
+              FROM resource_availability 
+              WHERE resource_id = :resourceId 
+              ORDER BY day_of_week, start_time";
+    $stmt = $db->prepare($query);
+    if ($stmt) {
+        $stmt->bindValue(':resourceId', $resourceId, SQLITE3_INTEGER);
+        $results = $stmt->execute();
+        
+        if ($results) {
+            while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+                $slots[] = $row;
+            }
+        }
+        $stmt->close();
+    } else {
+        error_log("Failed to prepare getResourceAvailability query: " . $db->lastErrorMsg());
+    }
+    return $slots;
+}
+/**
+ * Sets the resource_availability slots for a specific resource by deleting 
+ * existing records and inserting the new batch.
+ *
+ * @param SQLite3 $db The database connection object.
+ * @param int $resourceId The ID of the resource.
+ * @param array $slots Array of slot objects (must contain 'day', 'start', 'end').
+ * @return bool True on successful update, false otherwise.
+ */
+function setResourceAvailability(SQLite3 $db, $resourceId, $slots) {
+    // Start transaction for atomic operation
+    $db->exec('BEGIN TRANSACTION');
+    try {
+        // Delete all existing slots for resource
+        $deleteQuery = "DELETE FROM resource_availability WHERE resource_id = :resourceId";
+        $deleteStmt = $db->prepare($deleteQuery);
+        $deleteStmt->bindValue(':resourceId', $resourceId, SQLITE3_INTEGER);
+        $deleteStmt->execute();
+        $deleteStmt->close();
+        
+        // Insert new slots
+        if (!empty($slots)) {
+            $insertQuery = "INSERT INTO resource_availability (resource_id, day_of_week, start_time, end_time) 
+                            VALUES (:resourceId, :day, :start, :end)";
+            $insertStmt = $db->prepare($insertQuery);
+
+            foreach ($slots as $slot) {
+                // Use the time strings exactly as received - they're TEXT fields
+                $insertStmt->bindValue(':resourceId', $resourceId, SQLITE3_INTEGER);
+                $insertStmt->bindValue(':day', $slot['day'], SQLITE3_TEXT);
+                $insertStmt->bindValue(':start', $slot['start'], SQLITE3_TEXT);
+                $insertStmt->bindValue(':end', $slot['end'], SQLITE3_TEXT);
+                
+                $result = $insertStmt->execute();
+                if (!$result) {
+                    error_log("Failed to insert slot: " . $db->lastErrorMsg());
+                    throw new Exception("Database insert failed: " . $db->lastErrorMsg());
+                }
+                $insertStmt->clearBindings();
+            }
+            $insertStmt->close();
+        }
+        
+        // Commit transaction
+        $db->exec('COMMIT');
+        return true;
+    } catch (Exception $e) {
+        // Rollback on error
+        $db->exec('ROLLBACK');
+        error_log("Failed to set resource availability: " . $e->getMessage());
+        return false;
+    }
+}
+//cpde for setting resource availabiltty above
 //booking related code above
 
 //if you wish to connect to a hosted mysql instance uncomment this ad fill out accordingly

@@ -54,7 +54,7 @@ if ($action === "login") {
                                 header("Location: ../frontend/resourceLocator.php");
                                 exit();
                             case "Admin":
-                                header("Location: ../frontend/resourceAllocator.html");
+                                header("Location: ../frontend/resourceAllocator.php");
                                 exit();
                             default:
                                 header('Location: ../frontend/resourceLocator.php');
