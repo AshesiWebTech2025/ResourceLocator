@@ -194,3 +194,38 @@ body {
         .focus\:border-ashesi-maroon:focus { border-color: #800000; }
         .hover\:bg-ashesi-light:hover { background-color: #F0F0F0; }
 /* general page styles above */
+/* hamberger styles below */
+.hamburger-btn span {
+        display: block;
+        width: 25px;
+        height: 3px;
+        background: #374151; /* Dark gray for visibility on white header */
+        border-radius: 5px;
+        transition: all 0.3s ease-in-out;
+    }
+    .hamburger-btn span:nth-child(2) {
+        margin: 5px 0;
+    }
+    .hamburger-btn[aria-expanded="true"] span:nth-child(1) {
+        transform: translateY(8px) rotate(45deg);
+    }
+    .hamburger-btn[aria-expanded="true"] span:nth-child(2) {
+        opacity: 0; /* Hide the middle line */
+    }
+    .hamburger-btn[aria-expanded="true"] span:nth-child(3) {
+        transform: translateY(-8px) rotate(-45deg);
+    }
+    
+    /* Lock body scrolling when the mobile nav is open */
+    .mobile-nav-open {
+        overflow: hidden !important;
+    }
+
+    /* Ensure fixed sidebar on desktop does not push content */
+    @media (min-width: 768px) {
+        body {
+            /* On desktop, the main content takes up remaining width */
+            padding-left: 0; 
+        }
+    }
+/* han=mburger styles above */

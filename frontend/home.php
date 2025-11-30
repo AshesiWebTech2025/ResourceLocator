@@ -1,27 +1,5 @@
 <?php
-    // Fetch available resources from database
-    require_once '../backend/dbConnector.php';
-    $db = connectDB();
-    $resources = [];
     
-    if ($db) {
-        $stmt = $db->prepare("
-            SELECT r.resource_id, r.name, r.capacity, r.description, rt.type_name
-            FROM Resources r
-            JOIN Resource_Types rt ON r.type_id = rt.type_id
-            WHERE r.is_bookable = 1
-            ORDER BY rt.type_name, r.name
-        ");
-        
-        if ($stmt) {
-            $results = $stmt->execute();
-            if ($results) {
-                while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
-                    $resources[] = $row;
-                }
-            }
-        }
-    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -56,9 +34,7 @@
 </head>
 <body class="bg-gray-50 font-sans antialiased flex h-screen overflow-hidden">
 
-    <button id="hamburgerBtn" class="hamburger-btn" aria-label="Toggle menu" aria-expanded="false" type="button">
-        <span></span><span></span><span></span>
-    </button>
+ 
 
     <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out bg-ashesi-maroon text-white w-64 flex flex-col z-20 shadow-xl">
         <div class="p-6 flex items-center h-16 border-b border-white/20">
@@ -87,9 +63,9 @@
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                 <span class="text-sm md:text-base">Student Portal</span>
             </div>
-            <button id="mobile-menu-button" class="md:hidden p-2 text-ashesi-maroon">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            </button>
+            <button id="hamburgerBtn" class="hamburger-btn md:hidden mr-4 p-2 focus:outline-none focus:ring-2 focus:ring-ashesi-maroon rounded" aria-label="Toggle menu" aria-expanded="false" type="button">
+          <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+      </button>
         </header>
 
         <main class="p-6 md:p-10 flex-1">
@@ -404,6 +380,41 @@
                 });
             }
         });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          const hamburgerBtn = document.getElementById('hamburgerBtn');
+          const sidebar = document.getElementById('sidebar');
+
+          if (hamburgerBtn && sidebar) {
+              hamburgerBtn.addEventListener('click', () => {
+                  const isExpanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+                  
+                  // Toggle sidebar visibility class
+                  sidebar.classList.toggle('-translate-x-full');
+                  
+                  // Toggle button state and body overflow for mobile
+                  hamburgerBtn.setAttribute('aria-expanded', !isExpanded);
+
+                  if (!isExpanded) {
+                      // Lock body scrolling when sidebar is open
+                      document.body.classList.add('mobile-nav-open');
+                  } else {
+                      // Re-enable body scrolling
+                      document.body.classList.remove('mobile-nav-open');
+                  }
+              });
+              sidebar.querySelectorAll('a').forEach(link => {
+                  link.addEventListener('click', () => {
+                      if (window.innerWidth < 768) {
+                          sidebar.classList.add('-translate-x-full');
+                          hamburgerBtn.setAttribute('aria-expanded', 'false');
+                          document.body.classList.remove('mobile-nav-open');
+                      }
+                  });
+              });
+          }
+      });
     </script>
 </body>
 </html>

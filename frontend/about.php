@@ -37,7 +37,6 @@
             <a href="about.php" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">About</a>
             <a href="software_architecture.php" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Architecture</a>
             <a href="pageflow.php" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Page Flow</a>
-
         </nav>
         <div class="p-4 space-y-2 border-t border-white/20">
             <a href="#" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Settings</a>
@@ -52,12 +51,13 @@
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <span class="text-sm md:text-base">Hi Kwadwo :)</span>
             </div>
-            <button id="mobile-menu-button" class="md:hidden p-2 text-ashesi-maroon">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            </button>
+             <button id="hamburgerBtn" class="hamburger-btn md:hidden mr-4 p-2 focus:outline-none focus:ring-2 focus:ring-ashesi-maroon rounded" aria-label="Toggle menu" aria-expanded="false" type="button">
+          <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+      </button>
         </header>
 
         <main class="p-6 md:p-10 flex-1">
+            
             <!-- Header Section -->
             <section class="bg-gradient-to-r from-ashesi-maroon to-red-900 text-white p-8 rounded-xl shadow-lg mb-8">
                 <h2 class="text-3xl md:text-4xl font-bold mb-2">What we've achieved so far....</h2>
@@ -335,6 +335,41 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="./js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          const hamburgerBtn = document.getElementById('hamburgerBtn');
+          const sidebar = document.getElementById('sidebar');
+
+          if (hamburgerBtn && sidebar) {
+              hamburgerBtn.addEventListener('click', () => {
+                  const isExpanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+                  
+                  // Toggle sidebar visibility class
+                  sidebar.classList.toggle('-translate-x-full');
+                  
+                  // Toggle button state and body overflow for mobile
+                  hamburgerBtn.setAttribute('aria-expanded', !isExpanded);
+
+                  if (!isExpanded) {
+                      // Lock body scrolling when sidebar is open
+                      document.body.classList.add('mobile-nav-open');
+                  } else {
+                      // Re-enable body scrolling
+                      document.body.classList.remove('mobile-nav-open');
+                  }
+              });
+              sidebar.querySelectorAll('a').forEach(link => {
+                  link.addEventListener('click', () => {
+                      if (window.innerWidth < 768) {
+                          sidebar.classList.add('-translate-x-full');
+                          hamburgerBtn.setAttribute('aria-expanded', 'false');
+                          document.body.classList.remove('mobile-nav-open');
+                      }
+                  });
+              });
+          }
+      });
+    </script>
+
 </body>
 </html>

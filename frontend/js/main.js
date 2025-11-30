@@ -308,3 +308,37 @@ if (typeof jQuery !== 'undefined') {
     });
 }
 // end of ashesi-locator JavaScript
+
+document.addEventListener('DOMContentLoaded', () => {
+          const hamburgerBtn = document.getElementById('hamburgerBtn');
+          const sidebar = document.getElementById('sidebar');
+
+          if (hamburgerBtn && sidebar) {
+              hamburgerBtn.addEventListener('click', () => {
+                  const isExpanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+                  
+                  // Toggle sidebar visibility class
+                  sidebar.classList.toggle('-translate-x-full');
+                  
+                  // Toggle button state and body overflow for mobile
+                  hamburgerBtn.setAttribute('aria-expanded', !isExpanded);
+
+                  if (!isExpanded) {
+                      // Lock body scrolling when sidebar is open
+                      document.body.classList.add('mobile-nav-open');
+                  } else {
+                      // Re-enable body scrolling
+                      document.body.classList.remove('mobile-nav-open');
+                  }
+              });
+              sidebar.querySelectorAll('a').forEach(link => {
+                  link.addEventListener('click', () => {
+                      if (window.innerWidth < 768) {
+                          sidebar.classList.add('-translate-x-full');
+                          hamburgerBtn.setAttribute('aria-expanded', 'false');
+                          document.body.classList.remove('mobile-nav-open');
+                      }
+                  });
+              });
+          }
+      });

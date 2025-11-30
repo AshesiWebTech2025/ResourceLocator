@@ -66,16 +66,13 @@ if ($db) {
     }
   </script>
   <!-- jQuery -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>\
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <!-- App script -->
-  <script src="./js/main.js" defer></script>
+  <script src="js/main.js" defer></script>
 </head>
 <body class="bg-gray-50 font-sans antialiased flex h-screen overflow-hidden">
-  <!-- Hamburger toggle (mobile) -->
-  <button id="hamburgerBtn" class="hamburger-btn" aria-label="Toggle menu" aria-expanded="false" type="button">
-    <span></span><span></span><span></span>
-  </button>
-  <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out bg-ashesi-maroon text-white w-64 flex flex-col z-20 shadow-xl">
+  
+  <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out bg-ashesi-maroon text-white w-64 flex flex-col z-50 shadow-xl">
       <div class="p-6 flex items-center h-16 border-b border-white/20">
           <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
           <span class="text-xl font-semibold">Ashesi Locator</span>
@@ -88,7 +85,6 @@ if ($db) {
           <a href="software_architecture.php" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Architecture</a>
           <a href="pageflow.php" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Page Flow</a>
 
-
       </nav>
       <div class="p-4 space-y-2 border-t border-white/20">
           <a href="#" class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Settings</a>
@@ -97,11 +93,15 @@ if ($db) {
   </aside>
 
   <div class="flex-1 flex flex-col overflow-y-auto main-content">
-    <header class="bg-white shadow-sm h-16 flex justify-between items-center px-6 md:px-10 sticky top-0 z-10">
-      <h1 class="text-xl md:text-2xl font-semibold text-gray-800">My Bookings</h1>
+    <header class="bg-white shadow-sm h-16 flex items-center px-6 md:px-10 sticky top-0 z-10">
+      <button id="hamburgerBtn" class="hamburger-btn md:hidden mr-4 p-2 focus:outline-none focus:ring-2 focus:ring-ashesi-maroon rounded" aria-label="Toggle menu" aria-expanded="false" type="button">
+          <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+      </button>
+
+      <h1 class="text-xl md:text-2xl font-semibold text-gray-800 mr-auto">My Bookings</h1>
       <div class="flex items-center gap-4">
         <button onclick="openBookingModal()" class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition duration-150">Book New Resource</button>
-        <button onclick="window.lco" id="toggle-map-btn" class="bg-ashesi-maroon text-white font-semibold py-2 px-4 rounded-lg hover:bg-ashesi-maroon/90 transition duration-150" ><a href="resourceLocator.php">Toggle Map View</a></button>
+        <button onclick="window.location.href='resourceLocator.php'" id="toggle-map-btn" class="bg-ashesi-maroon text-white font-semibold py-2 px-4 rounded-lg hover:bg-ashesi-maroon/90 transition duration-150" >Toggle Map View</button>
       </div>
     </header>
 
@@ -376,7 +376,6 @@ if ($db) {
           </div>
       </div>
   </div>
-
   <!-- Cancel Booking Confirmation Modal -->
   <div id="cancelBookingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div class="bg-white rounded-xl shadow-2xl max-w-md w-full">
@@ -411,6 +410,42 @@ if ($db) {
   </div>
 
   <script>
+      // Sidebar logic
+      document.addEventListener('DOMContentLoaded', () => {
+          const hamburgerBtn = document.getElementById('hamburgerBtn');
+          const sidebar = document.getElementById('sidebar');
+
+          if (hamburgerBtn && sidebar) {
+              hamburgerBtn.addEventListener('click', () => {
+                  const isExpanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+                  
+                  // Toggle sidebar visibility class
+                  sidebar.classList.toggle('-translate-x-full');
+                  
+                  // Toggle button state and body overflow for mobile
+                  hamburgerBtn.setAttribute('aria-expanded', !isExpanded);
+
+                  if (!isExpanded) {
+                      // Lock body scrolling when sidebar is open
+                      document.body.classList.add('mobile-nav-open');
+                  } else {
+                      // Re-enable body scrolling
+                      document.body.classList.remove('mobile-nav-open');
+                  }
+              });
+              sidebar.querySelectorAll('a').forEach(link => {
+                  link.addEventListener('click', () => {
+                      if (window.innerWidth < 768) {
+                          sidebar.classList.add('-translate-x-full');
+                          hamburgerBtn.setAttribute('aria-expanded', 'false');
+                          document.body.classList.remove('mobile-nav-open');
+                      }
+                  });
+              });
+          }
+      });
+
+
       function openBookingModal() {
           document.getElementById('bookingModal').classList.remove('hidden');
           document.body.style.overflow = 'hidden';
@@ -467,12 +502,10 @@ if ($db) {
       document.getElementById('viewBookingModal')?.addEventListener('click', function(e) {
           if (e.target === this) closeViewModal();
       });
-
       document.getElementById('cancelBookingModal')?.addEventListener('click', function(e) {
           if (e.target === this) closeCancelModal();
       });
   </script>
-
-  <script src="./js/main.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
