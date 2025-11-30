@@ -185,3 +185,12 @@ body {
     font-family: Arial, sans-serif;
 }
 /* end of login styles */
+
+/* general page styles below */
+   .bg-ashesi-maroon { background-color: #800000; }
+        .text-ashesi-maroon { color: #800000; }
+        .border-ashesi-maroon { border-color: #800000; }
+        .focus\:ring-ashesi-maroon:focus { --tw-ring-color: #800000; }
+        .focus\:border-ashesi-maroon:focus { border-color: #800000; }
+        .hover\:bg-ashesi-light:hover { background-color: #F0F0F0; }
+/* general page styles above */

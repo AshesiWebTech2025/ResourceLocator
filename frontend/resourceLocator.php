@@ -55,15 +55,7 @@ function generateResourceCard(array $resource): string {
     <link rel="stylesheet" href="css/style.css">
     <script src="js/tailwindConfig.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-
-    <style>
-        .bg-ashesi-maroon { background-color: #800000; }
-        .text-ashesi-maroon { color: #800000; }
-        .border-ashesi-maroon { border-color: #800000; }
-        .focus\:ring-ashesi-maroon:focus { --tw-ring-color: #800000; }
-        .focus\:border-ashesi-maroon:focus { border-color: #800000; }
-        .hover\:bg-ashesi-light:hover { background-color: #F0F0F0; }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="bg-gray-50 font-sans antialiased flex h-screen overflow-hidden">
     <!-- side nav -->

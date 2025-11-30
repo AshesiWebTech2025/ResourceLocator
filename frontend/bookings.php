@@ -13,51 +13,18 @@ if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
 $user_role = $_SESSION['role'] ?? 'Student';
 $user_first_name = $_SESSION["first_name"];
 $user_last_name = $_SESSION["last_name"];
+$userId = $_SESSION["user_id"];
 $header_text = htmlspecialchars($user_role) . " Portal";
 $db = connectDB();
 $bookings = [];
 $query_error = false;
 $resources = [];
+$bookings = [];
 if ($db) {
     $resources = getAllResources($db);
+    $bookngs = getAllBookings($db, $userId);
     $db->close();
 }
-
-    if ($db) {
-        $userId = 1; // Hardcoded user_id=1 for now (in production, this would come from session)
-        
-        // Join Bookings with Resources to get the resource name
-        $stmt = $db->prepare("
-            SELECT 
-                b.booking_id,
-                b.start_time, 
-                b.end_time, 
-                b.status,
-                b.purpose,
-                r.name AS resource_name 
-            FROM Bookings b
-            JOIN Resources r ON b.resource_id = r.resource_id
-            WHERE b.user_id = :user_id
-            ORDER BY b.start_time DESC
-        ");
-        
-        if ($stmt) {
-            $stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
-            $results = $stmt->execute();
-
-            if ($results) {
-                while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
-                    $bookings[] = $row;
-                }
-            } else {
-                $query_error = "Database query failed: " . $db->lastErrorMsg();
-            }
-        } else {
-            $query_error = "Failed to prepare the database statement.";
-        }
-    } else {
-        $query_error = "Database connection failed.";
-    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
