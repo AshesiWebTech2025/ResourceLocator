@@ -136,38 +136,97 @@ if (!isset($_SESSION['user_id'])) {
         </div>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-          const hamburgerBtn = document.getElementById('hamburgerBtn');
-          const sidebar = document.getElementById('sidebar');
+    document.addEventListener('DOMContentLoaded', () => {
+      const hamburgerBtn = document.getElementById('hamburgerBtn');
+      const sidebar = document.getElementById('sidebar');
 
-          if (hamburgerBtn && sidebar) {
-              hamburgerBtn.addEventListener('click', () => {
-                  const isExpanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
-                  
-                  // Toggle sidebar visibility class
-                  sidebar.classList.toggle('-translate-x-full');
-                  
-                  // Toggle button state and body overflow for mobile
-                  hamburgerBtn.setAttribute('aria-expanded', !isExpanded);
+      if (!hamburgerBtn || !sidebar) return;
 
-                  if (!isExpanded) {
-                      // Lock body scrolling when sidebar is open
-                      document.body.classList.add('mobile-nav-open');
-                  } else {
-                      // Re-enable body scrolling
-                      document.body.classList.remove('mobile-nav-open');
-                  }
-              });
-              sidebar.querySelectorAll('a').forEach(link => {
-                  link.addEventListener('click', () => {
-                      if (window.innerWidth < 768) {
-                          sidebar.classList.add('-translate-x-full');
-                          hamburgerBtn.setAttribute('aria-expanded', 'false');
-                          document.body.classList.remove('mobile-nav-open');
-                      }
-                  });
-              });
-          }
+      // Function to check if we're on mobile
+      const isMobile = () => window.innerWidth < 768;
+
+      // Initialize sidebar state based on screen size
+      const initializeSidebar = () => {
+        if (isMobile()) {
+          // Mobile: sidebar hidden by default
+          sidebar.classList.add('-translate-x-full');
+          hamburgerBtn.setAttribute('aria-expanded', 'false');
+          document.body.classList.remove('mobile-nav-open');
+        } else {
+          // Desktop: sidebar always visible
+          sidebar.classList.remove('-translate-x-full');
+          hamburgerBtn.setAttribute('aria-expanded', 'true');
+          document.body.classList.remove('mobile-nav-open');
+        }
+      };
+
+      // Toggle sidebar (mobile only)
+      const toggleSidebar = () => {
+        if (!isMobile()) return; // Don't toggle on desktop
+
+        const isExpanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+        
+        if (isExpanded) {
+          // Close sidebar
+          sidebar.classList.add('-translate-x-full');
+          hamburgerBtn.setAttribute('aria-expanded', 'false');
+          document.body.classList.remove('mobile-nav-open');
+        } else {
+          // Open sidebar
+          sidebar.classList.remove('-translate-x-full');
+          hamburgerBtn.setAttribute('aria-expanded', 'true');
+          document.body.classList.add('mobile-nav-open');
+        }
+      };
+
+      // Close sidebar (mobile only)
+      const closeSidebar = () => {
+        if (!isMobile()) return;
+        
+        sidebar.classList.add('-translate-x-full');
+        hamburgerBtn.setAttribute('aria-expanded', 'false');
+        document.body.classList.remove('mobile-nav-open');
+      };
+
+      // Hamburger button click
+      hamburgerBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent event from bubbling
+        toggleSidebar();
       });
-    </script>
+
+      // Close sidebar when clicking navigation links (mobile only)
+      sidebar.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          closeSidebar();
+        });
+      });
+
+      // Close sidebar when clicking outside (mobile only)
+      document.addEventListener('click', (e) => {
+        if (!isMobile()) return;
+
+        const isOpen = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+        if (!isOpen) return;
+
+        const clickedInsideSidebar = sidebar.contains(e.target);
+        const clickedHamburger = hamburgerBtn.contains(e.target);
+
+        if (!clickedInsideSidebar && !clickedHamburger) {
+          closeSidebar();
+        }
+      });
+
+      // Handle window resize
+      let resizeTimer;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          initializeSidebar();
+        }, 250); // Debounce resize events
+      });
+
+      // Initialize on load
+      initializeSidebar();
+    });
+  </script>
 </body>  

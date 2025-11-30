@@ -208,6 +208,101 @@ function generateResourceCard(array $resource): string {
             </div>
         </footer>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const hamburgerBtn = document.getElementById('hamburgerBtn');
+      const sidebar = document.getElementById('sidebar');
+
+      if (!hamburgerBtn || !sidebar) return;
+
+      // Function to check if we're on mobile
+      const isMobile = () => window.innerWidth < 768;
+
+      // Initialize sidebar state based on screen size
+      const initializeSidebar = () => {
+        if (isMobile()) {
+          // Mobile: sidebar hidden by default
+          sidebar.classList.add('-translate-x-full');
+          hamburgerBtn.setAttribute('aria-expanded', 'false');
+          document.body.classList.remove('mobile-nav-open');
+        } else {
+          // Desktop: sidebar always visible
+          sidebar.classList.remove('-translate-x-full');
+          hamburgerBtn.setAttribute('aria-expanded', 'true');
+          document.body.classList.remove('mobile-nav-open');
+        }
+      };
+
+      // Toggle sidebar (mobile only)
+      const toggleSidebar = () => {
+        if (!isMobile()) return; // Don't toggle on desktop
+
+        const isExpanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+        
+        if (isExpanded) {
+          // Close sidebar
+          sidebar.classList.add('-translate-x-full');
+          hamburgerBtn.setAttribute('aria-expanded', 'false');
+          document.body.classList.remove('mobile-nav-open');
+        } else {
+          // Open sidebar
+          sidebar.classList.remove('-translate-x-full');
+          hamburgerBtn.setAttribute('aria-expanded', 'true');
+          document.body.classList.add('mobile-nav-open');
+        }
+      };
+
+      // Close sidebar (mobile only)
+      const closeSidebar = () => {
+        if (!isMobile()) return;
+        
+        sidebar.classList.add('-translate-x-full');
+        hamburgerBtn.setAttribute('aria-expanded', 'false');
+        document.body.classList.remove('mobile-nav-open');
+      };
+
+      // Hamburger button click
+      hamburgerBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent event from bubbling
+        toggleSidebar();
+      });
+
+      // Close sidebar when clicking navigation links (mobile only)
+      sidebar.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          closeSidebar();
+        });
+      });
+
+      // Close sidebar when clicking outside (mobile only)
+      document.addEventListener('click', (e) => {
+        if (!isMobile()) return;
+
+        const isOpen = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+        if (!isOpen) return;
+
+        const clickedInsideSidebar = sidebar.contains(e.target);
+        const clickedHamburger = hamburgerBtn.contains(e.target);
+
+        if (!clickedInsideSidebar && !clickedHamburger) {
+          closeSidebar();
+        }
+      });
+
+      // Handle window resize
+      let resizeTimer;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          initializeSidebar();
+        }, 250); // Debounce resize events
+      });
+
+      // Initialize on load
+      initializeSidebar();
+    });
+  </script>
     
     <script>
         //global map variable and markers storage
@@ -276,116 +371,8 @@ function generateResourceCard(array $resource): string {
                 map.fitBounds(bounds, { padding: 50, maxZoom: 16 });
             }
         }
-        document.addEventListener('DOMContentLoaded', () => {
-            const searchInput = document.getElementById('resource-search-input');
-            const listContainer = document.getElementById('resource-list-container');
-            let debounceTimeout;
-            //function to fetch and update the resource list based on search term
-            const updateResourceList = (searchTerm) => {
-                listContainer.innerHTML = `<div class="text-center p-4 text-gray-400">
-                                            <svg class="animate-spin h-5 w-5 mr-3 text-ashesi-maroon inline-block" viewBox="0 0 24 24"></svg>
-                                            Searching...
-                                        </div>`;
-
-                fetch('../backend/fetch_resources.php?search=' + encodeURIComponent(searchTerm))
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        //update the HTML content
-                        listContainer.innerHTML = data.html;
-                        //update map markers with resource data
-                        updateMapMarkers(data.resources);
-                    })
-                    .catch(error => {
-                        console.error('Fetch error:', error);
-                        listContainer.innerHTML = `<div class="text-center p-4 text-red-500">Error loading resources. Check console for details.</div>`;
-                    });
-            };
-            //debounce the search input to limit server calls while typing
-            searchInput.addEventListener('keyup', (e) => {
-                clearTimeout(debounceTimeout);
-                const searchTerm = e.target.value.trim();
-                
-                debounceTimeout = setTimeout(() => {
-                    updateResourceList(searchTerm);
-                }, 300);
-            });
-            //view switching logic
-            const mapView = document.getElementById('map-view');
-            const bookingsView = document.getElementById('bookings-view');
-            const navMap = document.getElementById('nav-map');
-            const navBookings = document.getElementById('nav-bookings');
-
-            function switchView(viewId) {
-                mapView.classList.add('hidden');
-                bookingsView.classList.add('hidden');
-
-                navMap.classList.remove('bg-white/20');
-                if (navBookings) navBookings.classList.remove('bg-white/20');
-                
-                if (viewId === 'map-view') {
-                    mapView.classList.remove('hidden');
-                    navMap.classList.add('bg-white/20');
-                } else if (viewId === 'bookings-view') {
-                    bookingsView.classList.remove('hidden');
-                    if (navBookings) navBookings.classList.add('bg-white/20');
-                }
-            }
-            navMap.addEventListener('click', (e) => {
-                e.preventDefault();
-                switchView('map-view');
-            });
-            if (navBookings) {
-                navBookings.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    switchView('bookings-view');
-                });
-            }
-            //mobile menu toggle
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const sidebar = document.getElementById('sidebar');
-
-            mobileMenuButton.addEventListener('click', () => {
-                sidebar.classList.toggle('-translate-x-full');
-            });
-        });
-        document.addEventListener('DOMContentLoaded', () => {
-          const hamburgerBtn = document.getElementById('hamburgerBtn');
-          const sidebar = document.getElementById('sidebar');
-
-          if (hamburgerBtn && sidebar) {
-              hamburgerBtn.addEventListener('click', () => {
-                  const isExpanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
-                  
-                  // Toggle sidebar visibility class
-                  sidebar.classList.toggle('-translate-x-full');
-                  
-                  // Toggle button state and body overflow for mobile
-                  hamburgerBtn.setAttribute('aria-expanded', !isExpanded);
-
-                  if (!isExpanded) {
-                      // Lock body scrolling when sidebar is open
-                      document.body.classList.add('mobile-nav-open');
-                  } else {
-                      // Re-enable body scrolling
-                      document.body.classList.remove('mobile-nav-open');
-                  }
-              });
-              sidebar.querySelectorAll('a').forEach(link => {
-                  link.addEventListener('click', () => {
-                      if (window.innerWidth < 768) {
-                          sidebar.classList.add('-translate-x-full');
-                          hamburgerBtn.setAttribute('aria-expanded', 'false');
-                          document.body.classList.remove('mobile-nav-open');
-                      }
-                  });
-              });
-          }
-      });
+        
+        
     </script>
     <script src="js/map.js"></script>
     <script src="js/main.js"></script>

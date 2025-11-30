@@ -93,6 +93,11 @@ session_start();
 
         <!-- Main Content Header (Student Portal) -->
         <header class="bg-white shadow-sm h-16 flex justify-between items-center px-6 md:px-10 sticky top-0 z-10">
+            <button id="hamburgerBtn" class="hamburger-btn md:hidden mr-4 p-2 focus:outline-none focus:ring-2 focus:ring-ashesi-maroon rounded" aria-label="Toggle menu" aria-expanded="false" type="button">
+                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
+                </svg>
+            </button>
             <h1 class="text-xl md:text-2xl font-semibold text-gray-800">Ashesi Campus Resource Locator</h1>
             <div
                 class="flex items-center text-ashesi-maroon font-medium border border-ashesi-maroon rounded-full py-1 px-4 cursor-pointer hover:bg-ashesi-maroon hover:text-white transition duration-200">
@@ -104,14 +109,14 @@ session_start();
                 <span class="text-sm md:text-base">Admin Portal</span>
             </div>
 
-            <!-- Mobile Menu Button (Hidden on Desktop) -->
+            <!-- Mobile Menu Button (Hidden on Desktop) 
             <button id="mobile-menu-button" class="md:hidden p-2 text-ashesi-maroon">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
                     </path>
                 </svg>
-            </button>
+            </button>-->
         </header>
 
         <!-- Body -->
@@ -261,6 +266,101 @@ session_start();
             </div>
         </footer>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const hamburgerBtn = document.getElementById('hamburgerBtn');
+      const sidebar = document.getElementById('sidebar');
+
+      if (!hamburgerBtn || !sidebar) return;
+
+      // Function to check if we're on mobile
+      const isMobile = () => window.innerWidth < 768;
+
+      // Initialize sidebar state based on screen size
+      const initializeSidebar = () => {
+        if (isMobile()) {
+          // Mobile: sidebar hidden by default
+          sidebar.classList.add('-translate-x-full');
+          hamburgerBtn.setAttribute('aria-expanded', 'false');
+          document.body.classList.remove('mobile-nav-open');
+        } else {
+          // Desktop: sidebar always visible
+          sidebar.classList.remove('-translate-x-full');
+          hamburgerBtn.setAttribute('aria-expanded', 'true');
+          document.body.classList.remove('mobile-nav-open');
+        }
+      };
+
+      // Toggle sidebar (mobile only)
+      const toggleSidebar = () => {
+        if (!isMobile()) return; // Don't toggle on desktop
+
+        const isExpanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+        
+        if (isExpanded) {
+          // Close sidebar
+          sidebar.classList.add('-translate-x-full');
+          hamburgerBtn.setAttribute('aria-expanded', 'false');
+          document.body.classList.remove('mobile-nav-open');
+        } else {
+          // Open sidebar
+          sidebar.classList.remove('-translate-x-full');
+          hamburgerBtn.setAttribute('aria-expanded', 'true');
+          document.body.classList.add('mobile-nav-open');
+        }
+      };
+
+      // Close sidebar (mobile only)
+      const closeSidebar = () => {
+        if (!isMobile()) return;
+        
+        sidebar.classList.add('-translate-x-full');
+        hamburgerBtn.setAttribute('aria-expanded', 'false');
+        document.body.classList.remove('mobile-nav-open');
+      };
+
+      // Hamburger button click
+      hamburgerBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent event from bubbling
+        toggleSidebar();
+      });
+
+      // Close sidebar when clicking navigation links (mobile only)
+      sidebar.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          closeSidebar();
+        });
+      });
+
+      // Close sidebar when clicking outside (mobile only)
+      document.addEventListener('click', (e) => {
+        if (!isMobile()) return;
+
+        const isOpen = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+        if (!isOpen) return;
+
+        const clickedInsideSidebar = sidebar.contains(e.target);
+        const clickedHamburger = hamburgerBtn.contains(e.target);
+
+        if (!clickedInsideSidebar && !clickedHamburger) {
+          closeSidebar();
+        }
+      });
+
+      // Handle window resize
+      let resizeTimer;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          initializeSidebar();
+        }, 250); // Debounce resize events
+      });
+
+      // Initialize on load
+      initializeSidebar();
+    });
+  </script>
 
     <!--JQuery Script for Form Toggle-->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

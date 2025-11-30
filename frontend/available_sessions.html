@@ -27,34 +27,68 @@
 <body class="bg-gray-50 font-sans antialiased flex h-screen overflow-hidden">
 
     <!-- Sidebar (re-uses admin nav styling from base) -->
-    <aside id="sidebar"
+     <aside id="sidebar"
         class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out bg-ashesi-maroon text-white w-64 flex flex-col z-20 shadow-xl">
+
+        <!-- Sidebar Header/Logo -->
         <div class="p-6 flex items-center h-16 border-b border-white/20">
-            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4"></path>
+            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
             </svg>
-            <span class="text-xl font-semibold">Admin</span>
+            <span class="text-xl font-semibold">Ashesi Locator</span>
         </div>
 
+        <!-- Primary Navigation Links -->
         <nav class="flex-grow p-4 space-y-2">
             <a href="resourceAllocator.php"
                 class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                    </path>
+                </svg>
                 Resource Allocator
             </a>
             <a href="available_sessions.html"
                 class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">
+                <svg class="w-5 h-5m r-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
                 Available Sessions
             </a>
             
         </nav>
 
+        <!-- Bottom Settings and Sign Out Links -->
         <div class="p-4 space-y-2 border-t border-white/20">
             <a href="#"
-                class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Settings</a>
+                class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z">
+                    </path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Settings
+            </a>
             <a href="login_signup.php"
-                class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">Sign
-                Out</a>
+                class="flex items-center p-3 rounded-lg hover:bg-white/10 transition duration-150 ease-in-out font-medium">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                    </path>
+                </svg>
+                Sign Out
+            </a>
         </div>
     </aside>
 
@@ -62,10 +96,23 @@
     <div class="flex-1 flex flex-col overflow-y-auto main-content">
 
         <header class="bg-white shadow-sm h-16 flex justify-between items-center px-6 md:px-10 sticky top-0 z-10">
-            <h1 class="text-xl md:text-2xl font-semibold text-gray-800">Available Sessions</h1>
+            <button id="hamburgerBtn" class="hamburger-btn md:hidden mr-4 p-2 focus:outline-none focus:ring-2 focus:ring-ashesi-maroon rounded" aria-label="Toggle menu" aria-expanded="false" type="button">
+                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
+                </svg>
+            </button>
+            <h1 class="text-xl md:text-2xl font-semibold text-gray-800">Ashesi Campus Resource Locator</h1>
             <div
-                class="flex items-center text-ashesi-maroon font-medium border border-ashesi-maroon rounded-full py-1 px-4">
-                Admin Mode</div>
+                class="flex items-center text-ashesi-maroon font-medium border border-ashesi-maroon rounded-full py-1 px-4 cursor-pointer hover:bg-ashesi-maroon hover:text-white transition duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                <span class="text-sm md:text-base">Admin Portal</span>
+            </div>
+
+            
         </header>
 
         <main class="p-6 md:p-10 flex-1">
@@ -153,6 +200,101 @@
             </form>
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const hamburgerBtn = document.getElementById('hamburgerBtn');
+      const sidebar = document.getElementById('sidebar');
+
+      if (!hamburgerBtn || !sidebar) return;
+
+      // Function to check if we're on mobile
+      const isMobile = () => window.innerWidth < 768;
+
+      // Initialize sidebar state based on screen size
+      const initializeSidebar = () => {
+        if (isMobile()) {
+          // Mobile: sidebar hidden by default
+          sidebar.classList.add('-translate-x-full');
+          hamburgerBtn.setAttribute('aria-expanded', 'false');
+          document.body.classList.remove('mobile-nav-open');
+        } else {
+          // Desktop: sidebar always visible
+          sidebar.classList.remove('-translate-x-full');
+          hamburgerBtn.setAttribute('aria-expanded', 'true');
+          document.body.classList.remove('mobile-nav-open');
+        }
+      };
+
+      // Toggle sidebar (mobile only)
+      const toggleSidebar = () => {
+        if (!isMobile()) return; // Don't toggle on desktop
+
+        const isExpanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+        
+        if (isExpanded) {
+          // Close sidebar
+          sidebar.classList.add('-translate-x-full');
+          hamburgerBtn.setAttribute('aria-expanded', 'false');
+          document.body.classList.remove('mobile-nav-open');
+        } else {
+          // Open sidebar
+          sidebar.classList.remove('-translate-x-full');
+          hamburgerBtn.setAttribute('aria-expanded', 'true');
+          document.body.classList.add('mobile-nav-open');
+        }
+      };
+
+      // Close sidebar (mobile only)
+      const closeSidebar = () => {
+        if (!isMobile()) return;
+        
+        sidebar.classList.add('-translate-x-full');
+        hamburgerBtn.setAttribute('aria-expanded', 'false');
+        document.body.classList.remove('mobile-nav-open');
+      };
+
+      // Hamburger button click
+      hamburgerBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent event from bubbling
+        toggleSidebar();
+      });
+
+      // Close sidebar when clicking navigation links (mobile only)
+      sidebar.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          closeSidebar();
+        });
+      });
+
+      // Close sidebar when clicking outside (mobile only)
+      document.addEventListener('click', (e) => {
+        if (!isMobile()) return;
+
+        const isOpen = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+        if (!isOpen) return;
+
+        const clickedInsideSidebar = sidebar.contains(e.target);
+        const clickedHamburger = hamburgerBtn.contains(e.target);
+
+        if (!clickedInsideSidebar && !clickedHamburger) {
+          closeSidebar();
+        }
+      });
+
+      // Handle window resize
+      let resizeTimer;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          initializeSidebar();
+        }, 250); // Debounce resize events
+      });
+
+      // Initialize on load
+      initializeSidebar();
+    });
+  </script>
 
     <!-- Frontend <> Backend integration script -->
     <script>

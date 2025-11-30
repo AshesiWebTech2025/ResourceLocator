@@ -118,11 +118,6 @@ $(document).ready(function () {
         }
     });
 
-    //Handle sidebar
-    document.getElementById('mobile-menu-button').addEventListener('click', function () {
-        const sidebar = document.getElementById('sidebar');
-        sidebar.classList.toggle('-translate-x-full');
-    });
 });
 
 $(document).ready(function() {

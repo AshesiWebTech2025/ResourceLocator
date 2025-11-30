@@ -185,94 +185,127 @@
 
 // ashesi-locator JavaScript (from ashesi-locator/js/main.js)
 // Mobile sidebar toggle (defensive checks)
-document.addEventListener('DOMContentLoaded', function () {
-    const mobileBtn = document.getElementById('mobile-menu-button');
+/*document.addEventListener('DOMContentLoaded', function () {
+
     const sidebar = document.getElementById('sidebar');
+    const mobileBtn = document.getElementById('mobile-menu-button');   
+    const hamburgerBtn = document.getElementById('hamburgerBtn');       
+    const overlay = document.getElementById('sidebar-overlay');
 
-    if (mobileBtn && sidebar) {
-        mobileBtn.addEventListener('click', function () {
-            // Toggle overlay if present
-            const overlay = document.getElementById('sidebar-overlay');
-            if (overlay) overlay.classList.toggle('hidden');
+    if (!sidebar) return;
 
-            sidebar.classList.toggle('-translate-x-full');
+    
+    const openSidebar = () => {
+        sidebar.classList.remove('-translate-x-full');
+        document.body.classList.add('mobile-nav-open');
+        if (hamburgerBtn) {
+            hamburgerBtn.classList.add('open');
+            hamburgerBtn.setAttribute('aria-expanded', 'true');
+        }
+        if (overlay) overlay.classList.remove('hidden');
+    };
+
+    const closeSidebar = () => {
+        sidebar.classList.add('-translate-x-full');
+        document.body.classList.remove('mobile-nav-open');
+        if (hamburgerBtn) {
+            hamburgerBtn.classList.remove('open');
+            hamburgerBtn.setAttribute('aria-expanded', 'false');
+        }
+        if (overlay) overlay.classList.add('hidden');
+    };
+
+    const isMobile = () => window.innerWidth < 768;
+
+    //button click handlers
+    if (mobileBtn) {
+        mobileBtn.addEventListener('click', () => {
+            if (sidebar.classList.contains('-translate-x-full')) openSidebar();
+            else closeSidebar();
         });
     }
 
-    // Hamburger / sidebar toggle (mobile) - centralized
-    const btn = document.getElementById('hamburgerBtn');
-    if (btn && sidebar) {
-        const openSidebar = () => {
-            sidebar.classList.remove('-translate-x-full');
-            btn.classList.add('open');
-            btn.setAttribute('aria-expanded', 'true');
-        };
-        const closeSidebar = () => {
-            sidebar.classList.add('-translate-x-full');
-            btn.classList.remove('open');
-            btn.setAttribute('aria-expanded', 'false');
-        };
-
-        btn.addEventListener('click', () => {
-            if (btn.classList.contains('open')) closeSidebar();
+    if (hamburgerBtn) {
+        hamburgerBtn.addEventListener('click', () => {
+            if (hamburgerBtn.classList.contains('open')) closeSidebar();
             else openSidebar();
         });
-
-        // close when a sidebar link is clicked (mobile)
-        document.querySelectorAll('#sidebar a').forEach(a => a.addEventListener('click', () => {
-            if (window.innerWidth < 768) closeSidebar();
-        }));
-
-        // ensure correct state on resize/load
-        const syncOnResize = () => {
-            if (window.innerWidth >= 768) {
-                sidebar.classList.remove('-translate-x-full');
-                btn.classList.remove('open');
-                btn.setAttribute('aria-expanded', 'false');
-            } else {
-                sidebar.classList.add('-translate-x-full');
-            }
-        };
-        window.addEventListener('resize', syncOnResize);
-        syncOnResize();
     }
-});
 
-// Highlight active sidebar link based on current URL
-document.addEventListener('DOMContentLoaded', function () {
+    //click outside sidebar to close (mobile)
+    document.addEventListener('click', (e) => {
+        if (!isMobile()) return; // only mobile behavior
+
+        const clickedInside = sidebar.contains(e.target);
+        const clickedHamburger = hamburgerBtn && hamburgerBtn.contains(e.target);
+        const clickedMobileBtn = mobileBtn && mobileBtn.contains(e.target);
+
+        const sidebarOpen = hamburgerBtn
+            ? hamburgerBtn.classList.contains('open')
+            : !sidebar.classList.contains('-translate-x-full');
+
+        if (sidebarOpen && !clickedInside && !clickedHamburger && !clickedMobileBtn) {
+            closeSidebar();
+        }
+    });
+
+    //resizing
+    const syncOnResize = () => {
+        if (!isMobile()) {
+            // Desktop: sidebar always open
+            sidebar.classList.remove('-translate-x-full');
+            if (overlay) overlay.classList.add('hidden');
+            if (hamburgerBtn) {
+                hamburgerBtn.classList.remove('open');
+                hamburgerBtn.setAttribute('aria-expanded', 'false');
+            }
+        } else {
+            // Mobile: sidebar closed by default
+            sidebar.classList.add('-translate-x-full');
+        }
+    };
+
+    window.addEventListener('resize', syncOnResize);
+    syncOnResize();
+
+
+    //sidebar link highlighting
     try {
         const path = window.location.pathname || '';
         const file = path.substring(path.lastIndexOf('/') + 1).toLowerCase();
-        // strip extension to allow matching .php <-> .html (compare base names)
-        const fileBase = file.replace(/\.[^/.]+$/, '');
+        const fileBase = file.replace(/\.[^/.]+$/, ''); // strip extension
+
         const links = document.querySelectorAll('#sidebar a');
         if (!links || links.length === 0) return;
 
         links.forEach(a => {
-            // normalize
+            // remove old active styling
             a.classList.remove('bg-white/20', 'bg-ashesi-maroon', 'text-white');
             a.removeAttribute('aria-current');
+
             const href = a.getAttribute('href') || '';
             const hrefFile = href.substring(href.lastIndexOf('/') + 1).toLowerCase();
             const hrefBase = hrefFile.replace(/\.[^/.]+$/, '');
 
-            // If base filenames match (ignores .php/.html), mark active.
+            // match base name → smooth php/html navigation
             if (hrefBase && fileBase && hrefBase === fileBase) {
                 a.classList.add('bg-white/20');
                 a.setAttribute('aria-current', 'page');
             }
 
-            // special-case when visiting root of frontend (no filename) — map to home
-            if ((!file || file === '' || fileBase === '') && (hrefBase === 'home' || hrefBase === 'home.php' || hrefBase === 'home')) {
+            // special root/home case
+            if ((!file || fileBase === '') &&
+                (hrefBase === 'home' || hrefBase === 'home.php' || hrefBase === 'home.html')) {
                 a.classList.add('bg-white/20');
                 a.setAttribute('aria-current', 'page');
             }
         });
     } catch (e) {
-        // defensive: don't break other scripts
-        console.warn('Active sidebar script error', e);
+        console.warn("Active link highlighter failed:", e);
     }
-});
+
+});*/
+
 
 // Basic jQuery animations and simple interactions (defensive checks)
 // Only run if jQuery is available
@@ -309,36 +342,3 @@ if (typeof jQuery !== 'undefined') {
 }
 // end of ashesi-locator JavaScript
 
-document.addEventListener('DOMContentLoaded', () => {
-          const hamburgerBtn = document.getElementById('hamburgerBtn');
-          const sidebar = document.getElementById('sidebar');
-
-          if (hamburgerBtn && sidebar) {
-              hamburgerBtn.addEventListener('click', () => {
-                  const isExpanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
-                  
-                  // Toggle sidebar visibility class
-                  sidebar.classList.toggle('-translate-x-full');
-                  
-                  // Toggle button state and body overflow for mobile
-                  hamburgerBtn.setAttribute('aria-expanded', !isExpanded);
-
-                  if (!isExpanded) {
-                      // Lock body scrolling when sidebar is open
-                      document.body.classList.add('mobile-nav-open');
-                  } else {
-                      // Re-enable body scrolling
-                      document.body.classList.remove('mobile-nav-open');
-                  }
-              });
-              sidebar.querySelectorAll('a').forEach(link => {
-                  link.addEventListener('click', () => {
-                      if (window.innerWidth < 768) {
-                          sidebar.classList.add('-translate-x-full');
-                          hamburgerBtn.setAttribute('aria-expanded', 'false');
-                          document.body.classList.remove('mobile-nav-open');
-                      }
-                  });
-              });
-          }
-      });
