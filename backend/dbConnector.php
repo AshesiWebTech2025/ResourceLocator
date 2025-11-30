@@ -92,17 +92,24 @@ function connectDB(){
  */
 function getFilteredResources(SQLite3 $db, $searchTerm = ''){
     $resources = [];
-    $search = $db->escapeString("%" . $searchTerm . "%");
-
+    //escape the search term to prevent SQL injection.
+    $escapedTerm = $db->escapeString($searchTerm);
+    //wrapping the escaped term in SQL LIKE wildcards (%) and single quotes (')
+    // for direct insertion into the query string.
+    $searchPattern = "'%" . $escapedTerm . "%'";
     $query = "SELECT r.*, rt.type_name 
               FROM Resources r 
               JOIN Resource_Types rt ON r.type_id = rt.type_id";
     
     if (!empty($searchTerm)) {
-        $query .= " WHERE r.name LIKE :search 
-                    OR r.description LIKE :search 
-                    OR rt.type_name LIKE :search";
+        //concatenate the query using the correctly formatted search pattern.
+        $query .= " WHERE r.name LIKE " . $searchPattern . 
+                    " OR r.description LIKE " . $searchPattern . 
+                    " OR rt.type_name LIKE " . $searchPattern;
     }
+    
+    // Log the query for debugging purposes
+    error_log("Executing Resource Query: " . $query);
 
     $results = $db->query($query);
 
