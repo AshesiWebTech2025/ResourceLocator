@@ -131,6 +131,172 @@ function getAllResources(SQLite3 $db){
     return getFilteredResources($db);
 }
 
+//booking related code below
+/**
+ * Retrieves all bookings for a specific user with resource details.
+ * @param SQLite3 $db The database connection object.
+ * @param int $userId The ID of the user whose bookings to retrieve.
+ * @param string $status Optional status filter ('Confirmed', 'Cancelled', 'Completed').
+ * @return array List of bookings with resource information.
+ */
+function getAllBookings(SQLite3 $db, $userId, $status = null){
+    $bookings = []; 
+    //build query with JOIN to get resource details
+    $query = "SELECT 
+                b.booking_id, 
+                b.resource_id, 
+                b.user_id, 
+                b.start_time, 
+                b.end_time, 
+                b.purpose, 
+                b.status,
+                r.name as resource_name,
+                r.capacity,
+                r.description,
+                rt.type_name as resource_type
+              FROM Bookings b
+              JOIN Resources r ON b.resource_id = r.resource_id
+              JOIN Resource_Types rt ON r.type_id = rt.type_id
+              WHERE b.user_id = :userId";
+    //add status filter if provided
+    if ($status !== null && in_array($status, ['Confirmed', 'Cancelled', 'Completed'])) {
+        $query .= " AND b.status = :status";
+    }
+    //order by start time (upcoming bookings first)
+    $query .= " ORDER BY b.start_time ASC";
+    //log query for debugging
+    error_log("Executing Bookings Query: " . $query);
+    //prepare statement to prevent SQL injection
+    $stmt = $db->prepare($query);
+    if ($stmt) {
+        //bind parameters
+        $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        
+        if ($status !== null && in_array($status, ['Confirmed', 'Cancelled', 'Completed'])) {
+            $stmt->bindValue(':status', $status, SQLITE3_TEXT);
+        }
+        //execute query
+        $results = $stmt->execute();
+        if ($results) {
+            while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+                $bookings[] = $row;
+            }
+        }
+        $stmt->close();
+    } else {
+        error_log("Failed to prepare bookings query: " . $db->lastErrorMsg());
+    }
+    return $bookings;
+}
+/**
+ * Retrieves upcoming bookings for a specific user (Confirmed status only, future dates).
+ *
+ * @param SQLite3 $db The database connection object.
+ * @param int $userId The ID of the user whose bookings to retrieve.
+ * @return array List of upcoming bookings.
+ */
+function getUpcomingBookings(SQLite3 $db, $userId){
+    $bookings = [];
+    $query = "SELECT 
+                b.booking_id, 
+                b.resource_id, 
+                b.user_id, 
+                b.start_time, 
+                b.end_time, 
+                b.purpose, 
+                b.status,
+                r.name as resource_name,
+                r.capacity,
+                r.description,
+                rt.type_name as resource_type
+              FROM Bookings b
+              JOIN Resources r ON b.resource_id = r.resource_id
+              JOIN Resource_Types rt ON r.type_id = rt.type_id
+              WHERE b.user_id = :userId 
+              AND b.status = 'Confirmed'
+              AND b.start_time >= datetime('now')
+              ORDER BY b.start_time ASC";
+    
+    $stmt = $db->prepare($query);
+    if ($stmt) {
+        $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $results = $stmt->execute();
+        
+        if ($results) {
+            while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+                $bookings[] = $row;
+            }
+        }
+        $stmt->close();
+    }
+    return $bookings;
+}
+/**
+ * Retrieves a single booking by booking ID.
+ *
+ * @param SQLite3 $db The database connection object.
+ * @param int $bookingId The ID of the booking to retrieve.
+ * @return array|null Booking details or null if not found.
+ */
+function getBookingById(SQLite3 $db, $bookingId){
+    $query = "SELECT 
+                b.booking_id, 
+                b.resource_id, 
+                b.user_id, 
+                b.start_time, 
+                b.end_time, 
+                b.purpose, 
+                b.status,
+                r.name as resource_name,
+                r.capacity,
+                r.description,
+                rt.type_name as resource_type
+              FROM Bookings b
+              JOIN Resources r ON b.resource_id = r.resource_id
+              JOIN Resource_Types rt ON r.type_id = rt.type_id
+              WHERE b.booking_id = :bookingId";
+    $stmt = $db->prepare($query);
+    if ($stmt) {
+        $stmt->bindValue(':bookingId', $bookingId, SQLITE3_INTEGER);
+        $results = $stmt->execute();
+        
+        if ($results) {
+            $booking = $results->fetchArray(SQLITE3_ASSOC);
+            $stmt->close();
+            return $booking ? $booking : null;
+        }
+        $stmt->close();
+    }
+    return null;
+}
+/**
+ * Cancels a booking by updating its status to 'Cancelled'.
+ * @param SQLite3 $db The database connection object.
+ * @param int $bookingId The ID of the booking to cancel.
+ * @param int $userId The ID of the user (for verification).
+ * @return bool True if cancelled successfully, false otherwise.
+ */
+function cancelBooking(SQLite3 $db, $bookingId, $userId){
+    //verify the booking belongs to the user before cancelling
+    $query = "UPDATE Bookings 
+              SET status = 'Cancelled' 
+              WHERE booking_id = :bookingId 
+              AND user_id = :userId 
+              AND status = 'Confirmed'";
+    
+    $stmt = $db->prepare($query);
+    if ($stmt) {
+        $stmt->bindValue(':bookingId', $bookingId, SQLITE3_INTEGER);
+        $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $result = $stmt->execute();
+        $stmt->close();
+        //check if any rows were affected
+        return $db->changes() > 0;
+    }
+    return false;
+}
+//booking related code above
+
 //if you wish to connect to a hosted mysql instance uncomment this ad fill out accordingly
 // $servername = "localhost"; //use school server IP if connecting to school server over a newtork connection, or set to  'localhost' for XAMPP
 // $username = "root";       //XAMPP default username

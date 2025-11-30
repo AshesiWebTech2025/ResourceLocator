@@ -1,40 +1,27 @@
 <?php
-    session_start();
-    
-    // --- START OF PHP ERROR DEBUGGING ---
     ini_set('display_errors', 1);
     ini_set('display_startup_errors', 1);
     error_reporting(E_ALL);
-    // --- END OF PHP ERROR DEBUGGING ---
-
-    // 1. Include the database connector
-    require_once '../backend/dbConnector.php';
-
-    // 2. Establish a connection
-    $db = connectDB();
-    $bookings = [];
-    $query_error = false;
-
-    // Fetch available resources for booking modal
-    $resources = [];
-    if ($db) {
-        $resStmt = $db->prepare("
-            SELECT r.resource_id, r.name, r.capacity, r.description, rt.type_name
-            FROM Resources r
-            JOIN Resource_Types rt ON r.type_id = rt.type_id
-            WHERE r.is_bookable = 1
-            ORDER BY rt.type_name, r.name
-        ");
-        
-        if ($resStmt) {
-            $resResults = $resStmt->execute();
-            if ($resResults) {
-                while ($row = $resResults->fetchArray(SQLITE3_ASSOC)) {
-                    $resources[] = $row;
-                }
-            }
-        }
-    }
+    session_start();
+    require_once('../backend/dbConnector.php'); 
+if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
+    $_SESSION['message'] = "Please log in to access this page.";
+    $_SESSION['message_type'] = "error";
+    header('Location: login_signup.php'); 
+    exit();
+}
+$user_role = $_SESSION['role'] ?? 'Student';
+$user_first_name = $_SESSION["first_name"];
+$user_last_name = $_SESSION["last_name"];
+$header_text = htmlspecialchars($user_role) . " Portal";
+$db = connectDB();
+$bookings = [];
+$query_error = false;
+$resources = [];
+if ($db) {
+    $resources = getAllResources($db);
+    $db->close();
+}
 
     if ($db) {
         $userId = 1; // Hardcoded user_id=1 for now (in production, this would come from session)
