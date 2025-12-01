@@ -1,199 +1,389 @@
-<h1 align="center">Ashesi Campus Resource Locator (acrl)</h1>
+# Ashesi Campus Resource Locator (ACRL)
 
-<p align="center">
-  A web application for locating and accessing campus resources on the Ashesi University campus.<br>
-  Designed for Web Technologies 213.
-  <br />
-  <a href="#features"><strong>Explore the Features »</strong></a>
-  <br /><br />
-  <img src="https://img.shields.io/badge/Status-In%20Development-blue?style=for-the-badge">
-  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge">
-  <img src="https://img.shields.io/badge/Contributions-Welcome-orange?style=for-the-badge">
-</p>
-
-
-## Table of Contents
-
-1. [Overview](#overview)  
-2. [Features](#features)  
-   - [General Users](#general-users-students-faculty-visitors)  
-   - [Admin Users](#admin-users)  
-3. [Core Web Pages](#core-web-pages)  
-4. [Database Design](#database-design)  
-5. [Tech Stack](#tech-stack)  
-6. [Preview](#preview--incoming)  
-7. [Learning Objectives](#learning-objectives)  
-8. [Installation Guide](#installation-guide)  
-9. [Contributors](#contributors)  
-10. [License](#license)  
-11. [Submission Links](#submission-links)
-
-
-
-## Overview
-
-The **Ashesi Campus Resource Locator (acrl)** is an interactive web-based system that helps students, faculty, staff, and visitors find and explore campus facilities.  
-The system centralizes resource information such as classrooms, labs, seminar rooms, and study spaces, and displays them on a fully interactive **Mapbox-powered map**.
-
-The application supports:
-- Admin tagging of campus hotspots  
-- Searching and filtering of resources  
-- Booking and availability management  
-- Secure login for authenticated users  
-- A responsive front-end interface  
-
-This project provided hands-on experience with mapping APIs, PHP–MySQL integration, dynamic data visualization, and full-stack system design.
-
-
-## Features
-
-### General Users (Students, Faculty, Visitors)
-- View all campus resource hotspots on an interactive map  
-- Filter resources by type or capacity  
-- Click and explore details for each resource  
-- Log in to access booking features  
-- Reserve available time slots for rooms  
-
-### Admin Users
-- Add new resources directly by clicking on the map  
-- jQuery-powered slide-in form for entering resource details  
-- Manage capacity, type, and location for each hotspot  
-- Edit availability using modal-based interfaces  
-- Update, create, and manage time sessions  
-
-
-## Core Web Pages
-
-| Page | Description |
-|------|-------------|
-| **Home Page** | Introduction to acrl and navigation to main pages |
-| **Login / Logout** | Authentication for general users and admins |
-| **Resource Locator Page** | Main Mapbox interface with search and filters |
-| **Booking Page** | Allows authenticated users to reserve a resource session |
-| **Admin: Resource Allocator** | Map-click tagging using a slide-in form |
-| **Admin: Available Sessions** | Modal editor for availability and time slot management |
+A comprehensive web application for locating, viewing, and booking campus resources at Ashesi University. Built as part of the Web Technologies 213 course.
 
 ---
 
-## Database Design
+## Table of Contents
 
-| Table | Fields |
-|-------|--------|
-| **users** | user_id, name, ashesi_email, password_hash, is_active, created_at, role |
-| **resources** | resource_id, type_id, name, capacity, description, longitude, latitude, is_bookable |
-| **bookings** | booking_id, user_id, resource_id, start_time, end_time, purpose, status |
-| **resource_availability** | availability_id, resource_id, day_of_week, start_time, end_time, created_at |
-| **resource_types** | type_id, type_name |
+1. [Overview](#overview)
+2. [Key Features](#key-features)
+3. [System Architecture](#system-architecture)
+4. [Project Structure](#project-structure)
+5. [Technology Stack](#technology-stack)
+6. [Database Schema](#database-schema)
+7. [Installation Guide](#installation-guide)
+8. [Server Deployment](#server-deployment)
+9. [Usage Guide](#usage-guide)
+10. [API Endpoints](#api-endpoints)
+11. [Screenshots](#screenshots)
+12. [Contributors](#contributors)
+13. [License](#license)
 
-This schema supports dynamic resource management, map integration, and booking functionality.
+---
 
+## Overview
 
-## Tech Stack
+The **Ashesi Campus Resource Locator (ACRL)** is an interactive web-based system designed to help students, faculty, staff, and visitors discover and book campus facilities. The platform centralizes information about classrooms, labs, seminar rooms, study spaces, and other campus resources, displaying them on an interactive Mapbox-powered map.
 
-<p align="left">
-  <img src="https://skillicons.dev/icons?i=html,css,js,php,mysql,tailwind,git,vscode" />
-</p>
+### Problem Statement
 
+Students and staff often struggle to find available spaces for meetings, study sessions, or events. Information about room availability, capacity, and location is scattered across different systems, leading to double bookings and inefficient resource utilization.
+
+### Solution
+
+ACRL provides a unified platform where users can:
+- Visualize all campus resources on an interactive map
+- Check real-time availability of rooms and spaces
+- Make bookings with automatic conflict detection
+- Manage resource availability through an admin interface
+
+---
+
+## Key Features
+
+### For General Users (Students, Faculty, Visitors)
+
+| Feature | Description |
+|---------|-------------|
+| Interactive Campus Map | View all resources on a Mapbox-powered map with zoom and navigation |
+| Resource Search | Filter resources by type, capacity, or availability |
+| Resource Details | View detailed information including capacity, description, and location |
+| Booking System | Reserve available time slots for rooms and spaces |
+| Booking Management | View, manage, and cancel existing bookings |
+| Availability Preview | See available and booked time slots before booking |
+
+### For Administrators
+
+| Feature | Description |
+|---------|-------------|
+| Resource Allocation | Add new resources by clicking on the map |
+| Resource Management | Edit resource details, capacity, and type |
+| Availability Configuration | Set weekly availability schedules for each resource |
+| Time Slot Management | Define when resources can be booked |
+| Resource Type Management | Create and manage resource categories |
+
+### Booking Validation System
+
+The application includes intelligent booking validation:
+
+- **Time Slot Validation:** Bookings must fall within defined availability windows (if configured)
+- **Conflict Detection:** Prevents double bookings automatically
+- **Flexible Resources:** Resources without defined time slots are freely bookable
+- **User-Friendly Messages:** Clear feedback on why a booking may be rejected
+
+---
+
+## System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      CLIENT BROWSER                          │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │   HTML/CSS  │  │ JavaScript  │  │    Mapbox GL JS     │  │
+│  │  TailwindCSS│  │   jQuery    │  │  Interactive Maps   │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      PHP BACKEND                             │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │   Routing   │  │   Session   │  │    API Handlers     │  │
+│  │   & Auth    │  │  Management │  │   (CRUD Operations) │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    SQLite DATABASE                           │
+│  ┌─────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────────┐ │
+│  │  Users  │ │ Resources│ │ Bookings │ │ Resource Avail.  │ │
+│  └─────────┘ └──────────┘ └──────────┘ └──────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Project Structure
+
+```
+ResourceLocator/
+├── backend/                    # PHP backend files
+│   ├── dbConnector.php         # Database connection and core functions
+│   ├── loginSignupPreprocessor.php  # Authentication handler
+│   ├── create_booking.php      # Booking creation endpoint
+│   ├── cancel_booking.php      # Booking cancellation endpoint
+│   ├── check_availability.php  # Availability check API
+│   ├── fetch_resources.php     # Resource listing API
+│   ├── fetch_bookings.php      # Booking retrieval API
+│   ├── resourceAllocator.php   # Resource creation handler
+│   ├── addType.php             # Resource type creation
+│   └── getTypes.php            # Resource type listing
+│
+├── frontend/                   # Frontend files
+│   ├── login_signup.php        # Authentication page
+│   ├── home.php                # Main dashboard
+│   ├── resourceLocator.php     # Interactive map view
+│   ├── bookings.php            # User bookings management
+│   ├── resourceAllocator.php   # Admin: Resource allocation
+│   ├── available_sessions.php  # Admin: Availability management
+│   ├── about.php               # About/team page
+│   ├── software_architecture.php  # Architecture documentation
+│   ├── pageflow.php            # Page flow documentation
+│   ├── css/
+│   │   └── style.css           # Custom styles
+│   ├── js/
+│   │   ├── main.js             # Core JavaScript utilities
+│   │   ├── map.js              # Mapbox integration
+│   │   ├── resourceAllocator.js # Resource allocation logic
+│   │   ├── available_sessions.js # Availability management
+│   │   └── tailwindConfig.js   # Tailwind configuration
+│   └── images/                 # Image assets
+│
+├── setup/                      # Database and setup files
+│   ├── mockDatabase.db         # SQLite database file
+│   └── *.py                    # Python setup scripts
+│
+├── README.md                   # Project documentation
+├── SERVER_SETUP.md             # Deployment guide
+└── LICENSE                     # MIT License
+```
+
+---
+
+## Technology Stack
+
+### Frontend
 | Technology | Purpose |
-|-----------|---------|
-| **HTML5 / CSS3 / TailwindCSS** | Frontend structure and styling |
-| **JavaScript & jQuery** | Client-side logic and interactive UI |
-| **PHP** | Backend logic, routing, and database operations |
-| **MySQL** | Persistent storage of resources, users, and sessions |
-| **Mapbox GL JS** | Interactive campus map and geolocation |
-| **Git & GitHub** | Version control and team collaboration |
+|------------|---------|
+| HTML5 | Semantic page structure |
+| TailwindCSS | Utility-first CSS framework |
+| JavaScript (ES6+) | Client-side interactivity |
+| jQuery | DOM manipulation and AJAX |
+| Mapbox GL JS | Interactive mapping |
 
+### Backend
+| Technology | Purpose |
+|------------|---------|
+| PHP 7.4+ | Server-side logic |
+| SQLite3 | Database management |
+| Session Management | User authentication state |
 
+### Development Tools
+| Tool | Purpose |
+|------|---------|
+| Git | Version control |
+| XAMPP | Local development server |
+| VS Code / Cursor | Code editor |
 
-## Preview
-<p align="center">
-  <img src="frontend/images/acrl_homePage.PNG" alt="acrl home page" width="700">
-</p>
+---
 
+## Database Schema
 
-## Learning Objectives
+### Entity Relationship Diagram
 
-Through building this project, we are gaining experience in:
-- Managing interactive mapping interfaces  
-- Designing and structuring a full-stack PHP application  
-- Performing CRUD operations with MySQL  
-- Creating dynamic UI components such as modals and slide-in forms  
-- Handling authentication and secure login flows  
-- Organizing a multi-file project with clean architecture  
-- Integrating frontend, backend, and mapping APIs cohesively  
+```
+┌──────────────┐     ┌──────────────────┐     ┌──────────────┐
+│    Users     │     │    Resources     │     │Resource_Types│
+├──────────────┤     ├──────────────────┤     ├──────────────┤
+│ user_id (PK) │     │ resource_id (PK) │────▶│ type_id (PK) │
+│ ashesi_email │     │ type_id (FK)     │     │ type_name    │
+│ first_name   │     │ name             │     └──────────────┘
+│ last_name    │     │ capacity         │
+│ role         │     │ description      │
+│ password_hash│     │ latitude         │
+│ is_active    │     │ longitude        │
+│ created_at   │     │ is_bookable      │
+└──────┬───────┘     └────────┬─────────┘
+       │                      │
+       │    ┌─────────────────┴───────────────────┐
+       │    │                                     │
+       ▼    ▼                                     ▼
+┌──────────────────┐                    ┌─────────────────────┐
+│     Bookings     │                    │Resource_Availability│
+├──────────────────┤                    ├─────────────────────┤
+│ booking_id (PK)  │                    │ availability_id (PK)│
+│ resource_id (FK) │                    │ resource_id (FK)    │
+│ user_id (FK)     │                    │ day_of_week         │
+│ start_time       │                    │ start_time          │
+│ end_time         │                    │ end_time            │
+│ purpose          │                    │ created_at          │
+│ status           │                    └─────────────────────┘
+└──────────────────┘
+```
 
+### Table Descriptions
+
+| Table | Description |
+|-------|-------------|
+| **Users** | Stores user accounts with authentication credentials and roles |
+| **Resources** | Campus facilities with location coordinates and capacity |
+| **Resource_Types** | Categories for organizing resources (Classroom, Lab, etc.) |
+| **Bookings** | User reservations with time slots and status tracking |
+| **Resource_Availability** | Weekly availability schedules for each resource |
+
+---
 
 ## Installation Guide
 
-1. **Clone the repository**
+### Prerequisites
+
+- XAMPP (Apache, PHP 7.4+, SQLite support)
+- Git
+- Web browser (Chrome, Firefox, Safari, or Edge)
+
+### Local Development Setup
+
+1. **Clone the Repository**
    ```bash
+   cd /path/to/xampp/htdocs
    git clone https://github.com/AshesiWebTech2025/ResourceLocator.git
+   cd ResourceLocator
+   ```
 
-2. **Set up the database**
-    - Open phpMyAdmin
-    - Create a database (e.g., acrl_db)
-    - Import the .sql file in the /database directory
+2. **Verify PHP SQLite Extension**
+   
+   Ensure SQLite3 is enabled in your PHP installation:
+   ```bash
+   php -m | grep sqlite
+   ```
 
-3. Configure database connection
-    - Update your credentials in db_config.php:
-    ```bash
-    $conn = mysqli_connect("localhost", "root", "", "acrl_db");
+3. **Set Database Permissions**
+   ```bash
+   chmod 755 setup/
+   chmod 666 setup/mockDatabase.db
+   ```
 
-4. Run the project
-    - Start Apache and MySQL in XAMPP
-    - Visit:
-    ```bash
-    http://localhost/ResourceLocator
-        ```
+4. **Start XAMPP Services**
+   - Launch XAMPP Control Panel
+   - Start Apache
 
+5. **Access the Application**
+   
+   Open your browser and navigate to:
+   ```
+   http://localhost/ResourceLocator/frontend/login_signup.php
+   ```
+
+### Default Test Accounts
+
+| Role | Email | Password |
+|------|-------|----------|
+| Student | test@ashesi.edu.gh | password123 |
+| Admin | admin@ashesi.edu.gh | admin123 |
+
+---
+
+## Server Deployment
+
+For detailed instructions on deploying to InfinityFree or similar hosting platforms, see:
+
+**[SERVER_SETUP.md](SERVER_SETUP.md)**
+
+---
+
+## Usage Guide
+
+### For Students/Faculty
+
+1. **Login:** Access the system with your Ashesi credentials
+2. **Browse Resources:** Use the Campus Map to explore available facilities
+3. **Make a Booking:**
+   - Click "Book a Resource" from the home page or bookings page
+   - Select a resource from the dropdown
+   - Choose a date and check available time slots
+   - Enter start time, end time, and purpose
+   - Submit the booking
+4. **Manage Bookings:** View and cancel bookings from "My Bookings"
+
+### For Administrators
+
+1. **Allocate Resources:**
+   - Navigate to Resource Allocator
+   - Click on the map to set location
+   - Fill in resource details
+   - Save the resource
+2. **Configure Availability:**
+   - Go to Available Sessions
+   - Select a resource
+   - Add time slots for each day
+   - Save the availability schedule
+
+---
+
+## API Endpoints
+
+### Resource Management
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `backend/fetch_resources.php` | GET | List all resources |
+| `backend/resourceAllocator.php` | POST | Create new resource |
+| `backend/getTypes.php` | GET | List resource types |
+| `backend/addType.php` | POST | Create resource type |
+
+### Booking Management
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `backend/create_booking.php` | POST | Create new booking |
+| `backend/cancel_booking.php` | POST | Cancel existing booking |
+| `backend/fetch_bookings.php` | GET | List user bookings |
+| `backend/check_availability.php` | GET | Check resource availability |
+
+### Availability Management
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `frontend/available_sessions.php?action=getAvailabilitySlots` | GET | Get time slots |
+| `frontend/available_sessions.php?action=updateSlots` | POST | Update time slots |
+
+---
+
+## Screenshots
+
+### Home Page
+![Home Page](frontend/images/acrl_homePage.PNG)
+
+### Available Sessions Management
+![Available Sessions](frontend/images/available-sessions.PNG)
+
+### System Architecture
+![ERD Diagram](frontend/images/ERD-Diagram.PNG)
+
+---
 
 ## Contributors
 
-<table>
-  <tr>
-    <td align="center">
-      <a href="https://github.com/malimba">
-        <img src="https://avatars.githubusercontent.com/u/44820067?v=4" width="90" height="90" style="border-radius:50%;">
-        <br />
-        <b>George</b>
-        <br />
-        <sub>malimba</sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/trpbtl">
-        <img src="https://avatars.githubusercontent.com/u/161168875?v=4" width="90" height="90" style="border-radius:50%;">
-        <br />
-        <b>Eyram-Makafui</b>
-        <br />
-        <sub>trpbtl</sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/marzafiee">
-        <img src="https://avatars.githubusercontent.com/u/114308048?v=4" width="90" height="90" style="border-radius:50%;">
-        <br />
-        <b>Inez</b>
-        <br />
-        <sub>marzafiee</sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/sirahknotfound">
-        <img src="https://avatars.githubusercontent.com/u/185804055?v=4" width="90" height="90" style="border-radius:50%;">
-        <br />
-        <b>Kharis</b>
-        <br />
-        <sub>sirahknotfound</sub>
-      </a>
-    </td>
-  </tr>
-</table>
+| Name | GitHub | Role |
+|------|--------|------|
+| George Malimba | [@malimba](https://github.com/malimba) | Backend Development, Database Design |
+| Eyram-Makafui Awoye | [@trpbtl](https://github.com/trpbtl) | Frontend Development, UI/UX |
+| Inez Marzafi | [@marzafiee](https://github.com/marzafiee) | Frontend Development, Documentation |
+| Kharis | [@sirahknotfound](https://github.com/sirahknotfound) | Integration, Testing |
 
+---
 
 ## License
-- Distributed under the MIT License.
-- See the LICENSE file for more information.
 
-## Submission Links
-- GitHub Repository: https://github.com/AshesiWebTech2025/ResourceLocator 
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## Acknowledgments
+
+- Ashesi University Web Technologies 213 Course
+- Mapbox for the interactive mapping platform
+- TailwindCSS for the utility-first CSS framework
+
+---
+
+## Repository
+
+GitHub: [https://github.com/AshesiWebTech2025/ResourceLocator](https://github.com/AshesiWebTech2025/ResourceLocator)
+
+---
+
+*Ashesi Campus Resource Locator - Web Technologies 213*  
+*Ashesi University, 2025*

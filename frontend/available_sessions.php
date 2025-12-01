@@ -11,9 +11,9 @@ if ($isApiRequest) {
     error_reporting(0);
     ob_start(); // Start output buffering to catch any stray output
 } else {
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 }
 
 require_once('../backend/dbConnector.php'); 
@@ -567,12 +567,12 @@ if (!$db_error && $db) {
                         if (xhr.status === 200) {
                             try {
                                 const data = JSON.parse(xhr.responseText);
-                                if (data.success) {
-                                    showMessage('availability saved successfully!', 'success');
-                                    setTimeout(closeModal, 1000);
-                                } else {
+                    if (data.success) {
+                        showMessage('availability saved successfully!', 'success');
+                        setTimeout(closeModal, 1000);
+                    } else {
                                     showMessage('Save failed: ' + (data.message || 'Unknown error'), 'error');
-                                }
+                    }
                             } catch (e) {
                                 console.error('Parse error:', e);
                                 showMessage('Invalid server response: ' + xhr.responseText.substring(0, 100), 'error');
