@@ -292,12 +292,15 @@ if ($db) {
                       </svg>
                       Checking availability...
                   </div>
+                  <div id="availability-free" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p class="text-sm font-medium text-blue-800">✓ This resource is freely bookable - no time restrictions! Just avoid already booked times below.</p>
+                  </div>
                   <div id="availability-slots" class="hidden bg-green-50 border border-green-200 rounded-lg p-3">
                       <p class="text-sm font-medium text-green-800 mb-2">✓ Available time slots for <span id="slot-day"></span>:</p>
                       <div id="slots-list" class="flex flex-wrap gap-2"></div>
                   </div>
                   <div id="availability-booked" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-2">
-                      <p class="text-sm font-medium text-yellow-800 mb-2">⚠ Already booked times:</p>
+                      <p class="text-sm font-medium text-yellow-800 mb-2">⚠ Already booked times (avoid these):</p>
                       <div id="booked-list" class="flex flex-wrap gap-2"></div>
                   </div>
                   <div id="availability-none" class="hidden bg-red-50 border border-red-200 rounded-lg p-3">
@@ -490,6 +493,7 @@ if ($db) {
       function hideAvailabilityInfo() {
           document.getElementById('availability-info').classList.add('hidden');
           document.getElementById('availability-loading').classList.add('hidden');
+          document.getElementById('availability-free').classList.add('hidden');
           document.getElementById('availability-slots').classList.add('hidden');
           document.getElementById('availability-booked').classList.add('hidden');
           document.getElementById('availability-none').classList.add('hidden');
@@ -510,6 +514,7 @@ if ($db) {
           document.getElementById('availability-slots').classList.add('hidden');
           document.getElementById('availability-booked').classList.add('hidden');
           document.getElementById('availability-none').classList.add('hidden');
+          document.getElementById('availability-free').classList.add('hidden');
           
           fetch(`../backend/check_availability.php?resource_id=${resourceId}&date=${date}`)
               .then(response => response.json())
@@ -517,11 +522,30 @@ if ($db) {
                   document.getElementById('availability-loading').classList.add('hidden');
                   
                   if (data.success && data.data) {
-                      if (!data.data.day_available) {
-                          // No availability on this day
-                          document.getElementById('availability-none').classList.remove('hidden');
+                      // Check if resource has no time restrictions (freely bookable)
+                      if (data.data.has_restrictions === false) {
+                          // Show "freely bookable" message
+                          document.getElementById('availability-free').classList.remove('hidden');
+                          
+                          // Still show booked slots if any
+                          if (data.data.booked_slots && data.data.booked_slots.length > 0) {
+                              const bookedContainer = document.getElementById('booked-list');
+                              bookedContainer.innerHTML = '';
+                              data.data.booked_slots.forEach(slot => {
+                                  const badge = document.createElement('span');
+                                  badge.className = 'bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-sm font-medium';
+                                  badge.textContent = `${slot.start} - ${slot.end}`;
+                                  bookedContainer.appendChild(badge);
+                              });
+                              document.getElementById('availability-booked').classList.remove('hidden');
+                          }
+                      } else if (!data.data.day_available) {
+                          // Has restrictions but not available on this day
+                          const noneEl = document.getElementById('availability-none');
+                          noneEl.innerHTML = `<p class="text-sm text-red-700">✗ ${data.data.message || 'This resource is not available on this day.'}</p>`;
+                          noneEl.classList.remove('hidden');
                       } else {
-                          // Show available slots
+                          // Has restrictions and available on this day - show slots
                           document.getElementById('slot-day').textContent = data.data.day_of_week;
                           
                           const slotsContainer = document.getElementById('slots-list');
