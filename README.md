@@ -3,6 +3,7 @@
 A comprehensive web application for locating, viewing, and booking campus resources at Ashesi University. Built as part of the Web Technologies 213 course.
 
 ---
+#
 
 ## Table of Contents
 
