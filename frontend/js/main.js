@@ -1,4 +1,4 @@
-//kharis code two
+//kharis code three
 /*$(document).ready(function () {
             const $panel = $("#allocatorSection");
 
