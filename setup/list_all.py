@@ -2,7 +2,7 @@ import sqlite3
 
 conn = sqlite3.connect('mockDatabase.db')
 cursor = conn.cursor()
-
+#user display promot 
 print("\n" + "=" * 70)
 print("ASHESI UNIVERSITY - ALL RESOURCES")
 print("=" * 70)
